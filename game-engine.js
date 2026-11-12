@@ -77,7 +77,7 @@ function applyCapture(state, color, destination) {
 
 export function rollDice(state, dice) {
   if (state.status !== "active" || state.winner) throw new Error("Game is not active");
-  if (state.pendingDice !== null) throw new Error("Choose a token first");
+  if (state.pendingDice !== null || (state.pendingRolls?.length && !state.awaitingBonusRoll)) throw new Error("Choose a token first");
   if (!Number.isInteger(dice) || dice < 1 || dice > 6) throw new Error("Dice must be an integer from 1 to 6");
   const next = clone(state);
   next.pendingRolls = [...(next.pendingRolls || []), dice];
@@ -92,10 +92,10 @@ export function rollDice(state, dice) {
       next.lastAction = { type: "bonus-roll", dice, player: state.turn, bonusRolls: next.consecutiveSixes };
     }
   } else {
-    next.consecutiveSixes = 0; next.awaitingBonusRoll = false;
+    next.consecutiveSixes = 0; next.awaitingBonusRoll = false; next.pendingDice = dice;
     next.legalMoves = next.pendingRolls.flatMap(value => getLegalMoves(next, value).map(move => ({...move, dice:value})));
     if (next.legalMoves.length === 0) {
-      next.pendingRolls = []; next.bonusEntryAvailable = false; next.turn = nextPlayer(next, state.turn);
+      next.pendingRolls = []; next.pendingDice = null; next.bonusEntryAvailable = false; next.turn = nextPlayer(next, state.turn);
       next.lastAction = { type: "no-legal-move", dice, player: state.turn };
     } else next.lastAction = { type: "roll", dice, player: state.turn };
   }
@@ -135,6 +135,6 @@ export function applyPlayerCommand(state, command, { authenticatedColor, expecte
   if (authenticatedColor !== state.turn) throw new Error("It is not this player's turn");
   if (!command || typeof command !== "object") throw new Error("Invalid command");
   if (command.type === "roll") return rollDice(state, dice);
-  if (command.type === "move") return moveToken(state, command.token);
+  if (command.type === "move") return moveToken(state, command.token, command.dice);
   throw new Error("Unsupported game command");
 }
