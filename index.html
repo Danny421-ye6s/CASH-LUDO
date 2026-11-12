@@ -42,6 +42,58 @@ button:disabled{opacity:.4;cursor:not-allowed}.primary{background:linear-gradien
 .hidden{display:none!important}
 @media(min-width:700px){.layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(240px,.75fr);gap:14px;align-items:start}.side{position:sticky;top:80px}}
 @media(max-width:380px){main{padding:14px 9px 35px}.board-wrap{padding:5px}.panel{padding:11px}.moves{gap:5px}.move-btn{font-size:11px}}
+
+/* CASH LUDO visual refresh: bright arcade board, raised yards and pip dice */
+body{background:radial-gradient(ellipse at 50% 45%,#39b9f0 0%,#0879c5 48%,#064477 100%);color:#fff}
+header{background:linear-gradient(180deg,#063f70d9,#075b91a8);border-bottom:1px solid #8edaff66}
+.brand{color:#fff;text-shadow:0 2px 5px #003b67;letter-spacing:2px}
+.pill{background:#07528caa;border-color:#8ddcff;color:#fff}
+main{max-width:760px;padding:10px 8px 30px}
+.hero{margin:6px 0 10px}.hero h1{font-size:clamp(22px,5vw,32px);text-shadow:0 2px 5px #03436b}.hero p{color:#d5f1ff}
+.layout{display:flex;flex-direction:column;gap:9px}
+.panel{background:linear-gradient(145deg,#0d79b7aa,#064d82aa);border:1px solid #a5e5ff77;border-radius:18px;padding:10px;box-shadow:0 7px 18px #00365b66}
+.game-top{justify-content:space-around;margin-bottom:7px}
+.player{padding:6px 9px;border-radius:22px;background:#034d7b99;border:1px solid #b7eaff55}
+.board-wrap{width:100%;max-width:620px;padding:0;margin:auto;background:transparent;border:0;border-radius:0}
+.board{gap:3px;background:transparent;border-radius:12px;overflow:hidden}
+.cell{background:#eaf6ff;border-radius:4px;box-shadow:inset 0 1px 2px #fff9,inset 0 -2px 2px #526a7b33}
+.cell.track{background:linear-gradient(145deg,#fff,#dcebf5);border:1px solid #b7cbd8}
+.cell.safe:after{content:"★";font-size:clamp(8px,2vw,15px);color:#fff;text-shadow:0 1px 3px #8a9aa8}
+.cell.zone-red,.cell.zone-green,.cell.zone-blue,.cell.zone-yellow{background:linear-gradient(145deg,#68dc53,#2e9f35);box-shadow:inset 0 0 0 2px #a5f27a,inset 0 -3px 4px #176c25}
+.cell.yard-red-inner{background:linear-gradient(145deg,#ff9a91,#ed514c);box-shadow:inset 0 0 0 2px #ffb4a7}
+.cell.yard-green-inner{background:linear-gradient(145deg,#73f39a,#08b95b);box-shadow:inset 0 0 0 2px #a5ffc0}
+.cell.yard-blue-inner{background:linear-gradient(145deg,#69c9ff,#1684dc);box-shadow:inset 0 0 0 2px #a2e4ff}
+.cell.yard-yellow-inner{background:linear-gradient(145deg,#ffe978,#f4b91d);box-shadow:inset 0 0 0 2px #fff0a0}
+.cell.red-lane{background:linear-gradient(145deg,#ffaaa2,#f06a64)}
+.cell.blue-lane{background:linear-gradient(145deg,#a8ddff,#58a9ee)}
+.cell.green-lane{background:linear-gradient(145deg,#a9f2bd,#4ecb7d)}
+.cell.yellow-lane{background:linear-gradient(145deg,#fff0a1,#efc53c)}
+.cell.base-red,.cell.base-blue,.cell.base-green,.cell.base-yellow{background:transparent}
+.cell.base-red:before,.cell.base-blue:before,.cell.base-green:before,.cell.base-yellow:before{inset:12%;border-radius:50%;background:radial-gradient(circle at 35% 28%,#ffffff 0%,#e9f1f8 45%,#b9cad8 100%);box-shadow:0 3px 5px #17344b88,inset 0 1px 3px #fff}
+.cell.center{background:conic-gradient(from -45deg,#f04436 0 25%,#12bd5d 0 50%,#f5c52c 0 75%,#238fe5 0);border:2px solid #d8f3ff}
+.cell.start-red{background:#f04c43}.cell.start-green{background:#19bd60}.cell.start-blue{background:#238fe5}.cell.start-yellow{background:#f4c52c}
+.token{width:75%;height:75%;border:2px solid #fff;border-bottom-width:4px;border-radius:50%;box-shadow:0 3px 5px #001d3c99,inset 0 2px 3px #ffffffaa;font-size:clamp(8px,1.7vw,13px);color:#17334c}
+.token.red{background:radial-gradient(circle at 32% 25%,#ffb0a8,#ee4039 68%,#a91e22)}
+.token.blue{background:radial-gradient(circle at 32% 25%,#c1eaff,#248fe8 68%,#07539a)}
+.token.green{background:radial-gradient(circle at 32% 25%,#c0ffd0,#22c968 68%,#087c3d)}
+.token.yellow{background:radial-gradient(circle at 32% 25%,#fff7b5,#f3c12c 68%,#b77b0a)}
+.token-stack .token{width:47%;height:47%}
+.legend{color:#e1f7ff;margin:7px 0}
+.side{position:relative;top:auto!important}
+.section-title{font-size:18px;color:#fff}
+.dice-area{margin:10px 0 13px}
+.dice{width:68px;height:68px;padding:10px;background:linear-gradient(145deg,#fff,#dce8f1);color:#122a40;border:1px solid #fff;border-radius:15px;box-shadow:0 5px 0 #8799a9,0 8px 14px #00365b77;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3px}
+.dice .pip{width:100%;height:100%;border-radius:50%;background:#172d43;align-self:center;justify-self:center;box-shadow:inset 0 1px 1px #ffffff33}
+@keyframes diceRoll{0%{transform:rotate(0) scale(1)}20%{transform:rotate(95deg) scale(1.12)}45%{transform:rotate(205deg) scale(.92)}70%{transform:rotate(310deg) scale(1.1)}100%{transform:rotate(720deg) scale(1)}}
+.dice.rolling{animation:diceRoll .9s cubic-bezier(.2,.75,.25,1)}
+.primary{background:linear-gradient(180deg,#ffe47a,#eaa900);color:#533400;border:1px solid #fff1a7;box-shadow:0 4px 0 #a66b08}
+.secondary{background:linear-gradient(180deg,#e8f5ff,#a9cde5);color:#123c5c;border:1px solid #fff;box-shadow:0 3px 0 #557e9c}
+.move-btn{background:linear-gradient(180deg,#fff,#b9def2);color:#123b5a;border-color:#fff}
+.status{background:#034b79cc;color:#effaff;border:1px solid #8bdcff66}
+.note{color:#d3efff}
+@media(min-width:700px){.layout{display:flex}.side{position:relative;top:auto}.board-wrap{max-width:620px}}
+@media(max-width:380px){main{padding:7px 5px 24px}.panel{padding:8px}.board{gap:2px}}
+
 </style>
 </head>
 <body>
@@ -99,6 +151,10 @@ for(let r=0;r<15;r++)for(let col=0;col<15;col++){
  else if(r<6&&col>8)el.classList.add("zone-green");
  else if(r>8&&col<6)el.classList.add("zone-yellow");
  else if(r>8&&col>8)el.classList.add("zone-blue");
+ if(r>=1&&r<=4&&col>=1&&col<=4)el.classList.add("yard-red-inner");
+ if(r>=1&&r<=4&&col>=10&&col<=13)el.classList.add("yard-green-inner");
+ if(r>=10&&r<=13&&col>=10&&col<=13)el.classList.add("yard-blue-inner");
+ if(r>=10&&r<=13&&col>=1&&col<=4)el.classList.add("yard-yellow-inner");
 }
 track.forEach((p,i)=>{
  const el=cellAt.get(p.join(","));el.classList.add("track");
@@ -113,6 +169,7 @@ for(const color of Object.keys(baseSpots))baseSpots[color].forEach(p=>cellAt.get
 cellAt.get("7,7").classList.add("center");
 let state=createGame({playerCount:2});
 let soundOn=true;
+let isRolling=false;
 let audioContext=null;
 function tone(frequency,duration=0.11,type="sine",volume=0.045){
  if(!soundOn)return;
@@ -154,7 +211,7 @@ function render(){
  for(const color of state.playerOrder)getPlayerTokenStatus(state,color).forEach(t=>addToken(color,t.token,t.progress));
  $("playersBar").innerHTML=state.playerOrder.map(color=>'<div class="player"><span class="dot '+color+'-dot"></span>'+color.toUpperCase()+' <span class="turn-label">'+(state.turn===color&&!state.winner?"YOUR TURN":"")+'</span></div>').join("");
  $("turnTitle").textContent=state.winner?state.winner.toUpperCase()+" WINS!":state.turn[0].toUpperCase()+state.turn.slice(1)+" player's turn";
- $("rollBtn").disabled=state.pendingDice!==null||state.status!=="active";
+ $("rollBtn").disabled=isRolling||state.pendingDice!==null||state.status!=="active";
  const moves=$("moves");moves.innerHTML="";
  if(state.pendingDice!==null){
   state.legalMoves.forEach(move=>{
@@ -178,18 +235,32 @@ function playMove(token){
   render();
  }catch(error){say(error.message);}
 }
+const pipPositions={1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
+function setDiceFace(value){
+ const diceEl=$("dice");diceEl.innerHTML="";
+ (pipPositions[value]||[]).forEach(position=>{
+  const pip=document.createElement("span");pip.className="pip";pip.style.gridColumn=String((position-1)%3+1);pip.style.gridRow=String(Math.floor((position-1)/3)+1);diceEl.append(pip);
+ });
+}
 $("rollBtn").onclick=()=>{
- try{
-  $("dice").classList.remove("rolling");void $("dice").offsetWidth;$("dice").classList.add("rolling");
-  playSound("roll");
-  const dice=1+Math.floor(Math.random()*6);lastDice=dice;state=rollDice(state,dice);
-  $("dice").textContent=String(dice);
-  if(state.lastAction.type==="three-sixes-forfeit")say("Three consecutive sixes! "+state.lastAction.player.toUpperCase()+" loses this turn.");
-  else if(state.lastAction.type==="no-legal-move")say(state.lastAction.player.toUpperCase()+" rolled "+dice+" but has no legal move. "+state.turn.toUpperCase()+" plays next.");
-  else say(state.turn.toUpperCase()+" rolled "+dice+". Choose one of the available token moves.");
-  $("diceCaption").textContent=dice===6?"Six!":"Dice result";
-  render();
- }catch(error){say(error.message);}
+ if(isRolling||state.pendingDice!==null||state.status!=="active")return;
+ isRolling=true;$("rollBtn").disabled=true;
+ $("dice").classList.remove("rolling");void $("dice").offsetWidth;$("dice").classList.add("rolling");
+ playSound("roll");
+ const dice=1+Math.floor(Math.random()*6);lastDice=dice;
+ let ticks=0;
+ const animation=setInterval(()=>{setDiceFace(1+Math.floor(Math.random()*6));ticks++;},95);
+ setTimeout(()=>{
+  clearInterval(animation);
+  try{
+   state=rollDice(state,dice);setDiceFace(dice);
+   if(state.lastAction.type==="three-sixes-forfeit")say("Three consecutive sixes! "+state.lastAction.player.toUpperCase()+" loses this turn.");
+   else if(state.lastAction.type==="no-legal-move")say(state.lastAction.player.toUpperCase()+" rolled "+dice+" but has no legal move. "+state.turn.toUpperCase()+" plays next.");
+   else say(state.turn.toUpperCase()+" rolled "+dice+". Choose one of the available token moves.");
+   $("diceCaption").textContent=dice===6?"Six!":"Dice result";
+  }catch(error){say(error.message);}
+  isRolling=false;$("dice").classList.remove("rolling");render();
+ },900);
 };
 $("soundBtn").onclick=()=>{soundOn=!soundOn;$("soundBtn").textContent="Sound: "+(soundOn?"On":"Off");if(soundOn)tone(660,.1);};
 $("newBtn").onclick=()=>{state=createGame({playerCount:Number($("playerCount").value)});lastDice=null;$("dice").textContent="—";$("diceCaption").textContent="Red starts. Roll a six to bring a token out of base.";say("New "+state.playerCount+"-player game started. Red plays first.");render();};
