@@ -143,6 +143,7 @@ button{border-radius:24px}
 @media(min-width:700px){main{max-width:700px}.layout{display:flex;flex-direction:column}.board-wrap{max-width:640px}.side{width:100%}.moves{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:380px){.board-wrap{padding:5px;border-width:2px}.board{gap:1px;padding:2px}.layout>section.panel{padding:6px}.side{padding:9px!important}}
 
+.board{gap:2px;background:#d7e8ef;padding:3px;border-radius:9px;overflow:hidden}.board-wrap{max-width:640px;width:100%;background:linear-gradient(145deg,#73dc50,#238d36);padding:7px;border:3px solid #a4f37a;border-radius:15px;box-shadow:0 5px 0 #17652d,0 10px 18px #003b6266}.cell.track{background:linear-gradient(145deg,#fff,#dcebf5);border:1px solid #b8cedb}.cell.zone-red,.cell.zone-green,.cell.zone-blue,.cell.zone-yellow{background:linear-gradient(145deg,#7ce65c,#32a83b);box-shadow:inset 0 0 0 1px #aaff82}.cell.base-red,.cell.base-blue,.cell.base-green,.cell.base-yellow{background:transparent}.cell.base-red:before,.cell.base-blue:before,.cell.base-green:before,.cell.base-yellow:before{border:2px solid #ffffff99;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff,#cbdbe6 70%,#8ea6b8);box-shadow:0 3px 4px #002f5488,inset 0 2px 3px white}.token{z-index:3;width:78%;height:78%;border:2px solid #fff;border-bottom-width:4px;border-radius:50%;box-shadow:0 3px 5px #002b4c99,inset 0 2px 3px #ffffffaa;display:block;padding:0;cursor:default;touch-action:manipulation}.token.red{background:radial-gradient(circle at 30% 24%,#ffc0b8,#ef4139 65%,#a51d22)}.token.blue{background:radial-gradient(circle at 30% 24%,#d5f2ff,#238de8 65%,#07539a)}.token.green{background:radial-gradient(circle at 30% 24%,#d2ffe0,#20c96b 65%,#087c3d)}.token.yellow{background:radial-gradient(circle at 30% 24%,#fff9c6,#f3c12c 65%,#a96c08)}.token-stack .token{width:48%;height:48%}.token.selectable{outline:3px solid #ffe17b;outline-offset:1px;animation:tokenGlow .85s ease-in-out infinite alternate;cursor:pointer}.dice{border:0;cursor:pointer;touch-action:manipulation}.dice:disabled{opacity:1;filter:grayscale(.4);cursor:default}.dice-area{justify-content:center}.moves{display:none!important}
 </style>
 </head>
 <body>
@@ -157,8 +158,8 @@ button{border-radius:24px}
 </section>
 <aside class="panel side">
 <h2 class="section-title" id="turnTitle">Red player's turn</h2><label for="playerCount" style="display:block;color:var(--muted);font-size:12px;margin:8px 0 5px">Players in this game</label><select id="playerCount" class="secondary" style="width:100%;padding:11px"><option value="2">2 players — Red vs Blue</option><option value="4">4 players — Red, Green, Blue, Yellow</option></select>
-<div class="dice-area"><div class="dice" id="dice" aria-label="Dice">—</div><div class="dice-caption" id="diceCaption">Start a new game, then roll the dice.</div></div>
-<div class="controls"><button class="primary" id="rollBtn">Roll dice</button><button class="secondary" id="newBtn">New game</button></div><button class="secondary" id="soundBtn" style="width:100%;margin-top:9px">Sound: On</button>
+<div class="dice-area" id="diceArea"><button type="button" class="dice" id="dice" aria-label="Tap to roll dice">—</button><div class="dice-caption" id="diceCaption">Red: tap the dice to roll.</div></div>
+<div class="controls"><button class="secondary" id="newBtn">New game</button></div><button class="secondary" id="soundBtn" style="width:100%;margin-top:9px">Sound: On</button>
 <div class="moves" id="moves"></div>
 <div class="status" id="status" aria-live="polite">Red starts. Roll a six to bring a token out of base.</div>
 <p class="note">Rules in this local build: two or four players, four tokens each, six to leave base, safe squares, captures, extra roll on six, and an exact roll to finish. Three consecutive sixes forfeit the turn. Online rooms are not connected yet.</p>
@@ -251,8 +252,8 @@ function addToken(color,token,progress){
  const el=cellAt.get(r+","+c);
  let stack=el.querySelector(".token-stack");
  if(!stack){stack=document.createElement("div");stack.className="token-stack";el.append(stack);}
- const piece=document.createElement("span");piece.className="token "+color;piece.textContent=String(token+1);piece.title=color+" token "+(token+1);
- if(state.pendingDice!==null&&state.legalMoves.some(m=>m.token===token))piece.classList.add("selectable");
+ const piece=document.createElement("button");piece.type="button";piece.className="token "+color;piece.setAttribute("aria-label",color+" token");piece.title=color+" token";
+ if(color===state.turn&&state.pendingDice!==null&&state.legalMoves.some(m=>m.token===token)){piece.classList.add("selectable");piece.addEventListener("click",()=>playMove(token));}
  stack.append(piece);
 }
 function render(){
@@ -260,15 +261,9 @@ function render(){
  for(const color of state.playerOrder)getPlayerTokenStatus(state,color).forEach(t=>addToken(color,t.token,t.progress));
  $("playersBar").innerHTML=state.playerOrder.map(color=>'<div class="player"><span class="dot '+color+'-dot"></span>'+color.toUpperCase()+' <span class="turn-label">'+(state.turn===color&&!state.winner?"● PLAYING":"")+'</span></div>').join("");
  $("turnTitle").textContent=state.winner?state.winner.toUpperCase()+" WINS!":state.turn[0].toUpperCase()+state.turn.slice(1)+" player's turn";
- $("rollBtn").disabled=isRolling||state.pendingDice!==null||state.status!=="active";
- const moves=$("moves");moves.innerHTML="";
- if(state.pendingDice!==null){
-  state.legalMoves.forEach(move=>{
-   const btn=document.createElement("button");btn.className="move-btn";
-   btn.textContent="Token "+(move.token+1)+(move.type==="enter"?" · Enter":move.type==="finish"?" · Finish":" · Move");
-   btn.onclick=()=>playMove(move.token);moves.append(btn);
-  });
- }
+ $("dice").disabled=isRolling||state.pendingDice!==null||state.status!=="active";
+ $("diceCaption").textContent=state.winner?"Game finished":state.pendingDice!==null?"Tap one of your glowing tokens":state.awaitingBonusRoll?"Six! Tap the dice for your bonus roll":state.turn[0].toUpperCase()+state.turn.slice(1)+": tap the dice to roll";
+ $("moves").innerHTML="";
 }
 function say(message){$("status").textContent=message;}
 function playMove(token){
@@ -278,8 +273,7 @@ function playMove(token){
   const action=state.lastAction;
   const captureText=action.captured.length?" Captured "+action.captured.map(x=>x.color.toUpperCase()+" token "+(x.token+1)).join(", ")+".":"";
   if(state.winner)say(state.winner.toUpperCase()+" has brought all four tokens home and wins!");
-  else if(state.turn===before.turn)say(before.turn.toUpperCase()+" moved token "+(token+1)+" and earned another roll."+captureText);
-  else say(before.turn.toUpperCase()+" moved token "+(token+1)+"."+captureText+" "+state.turn.toUpperCase()+" plays next.");
+  else say(before.turn.toUpperCase()+" moved a token."+captureText+" "+state.turn.toUpperCase()+" plays next.");
   $("diceCaption").textContent="Choose a highlighted token move.";
   render();
  }catch(error){say(error.message);}
@@ -291,9 +285,9 @@ function setDiceFace(value){
   const pip=document.createElement("span");pip.className="pip";pip.style.gridColumn=String((position-1)%3+1);pip.style.gridRow=String(Math.floor((position-1)/3)+1);diceEl.append(pip);
  });
 }
-$("rollBtn").onclick=()=>{
+$("dice").onclick=()=>{
  if(isRolling||state.pendingDice!==null||state.status!=="active")return;
- isRolling=true;$("rollBtn").disabled=true;
+ isRolling=true;$("dice").disabled=true;
  $("dice").classList.remove("rolling");void $("dice").offsetWidth;$("dice").classList.add("rolling");
  playSound("roll");
  const dice=1+Math.floor(Math.random()*6);lastDice=dice;
@@ -303,16 +297,17 @@ $("rollBtn").onclick=()=>{
   clearInterval(animation);
   try{
    state=rollDice(state,dice);setDiceFace(dice);
-   if(state.lastAction.type==="three-sixes-forfeit")say("Three consecutive sixes! "+state.lastAction.player.toUpperCase()+" loses this turn.");
+   if(state.lastAction.type==="three-sixes-forfeit")say("Three sixes! "+state.lastAction.player.toUpperCase()+" loses the turn.");
+   else if(state.lastAction.type==="bonus-roll")say("Six! Roll again before moving a token.");
    else if(state.lastAction.type==="no-legal-move")say(state.lastAction.player.toUpperCase()+" rolled "+dice+" but has no legal move. "+state.turn.toUpperCase()+" plays next.");
-   else say(state.turn.toUpperCase()+" rolled "+dice+". Choose one of the available token moves.");
-   $("diceCaption").textContent=dice===6?"Six!":"Dice result";
+   else say(state.turn.toUpperCase()+" rolled "+dice+". Tap one of your glowing tokens on the board.");
+   $("diceCaption").textContent=state.lastAction.type==="bonus-roll"?"Six! Tap again for bonus roll":state.lastAction.type==="roll"?"Tap a glowing token to move":"Tap the dice to roll";
   }catch(error){say(error.message);}
   isRolling=false;$("dice").classList.remove("rolling");render();
  },900);
 };
 $("soundBtn").onclick=()=>{soundOn=!soundOn;$("soundBtn").textContent="Sound: "+(soundOn?"On":"Off");if(soundOn)tone(660,.1);};
-$("newBtn").onclick=()=>{state=createGame({playerCount:Number($("playerCount").value)});lastDice=null;$("dice").textContent="—";$("diceCaption").textContent="Red starts. Roll a six to bring a token out of base.";say("New "+state.playerCount+"-player game started. Red plays first.");render();};
+$("newBtn").onclick=()=>{state=createGame({playerCount:Number($("playerCount").value)});lastDice=null;$("dice").textContent="—";$("diceCaption").textContent="Red: tap the dice to roll.";say("New "+state.playerCount+"-player game started. Red plays first.");render();};
 render();
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}</script>
