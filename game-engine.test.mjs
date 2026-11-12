@@ -27,12 +27,12 @@ test("three consecutive sixes forfeit the turn", () => {
 });
 test("safe squares prevent capture", () => {
   const s=createGame(); const safe=SAFE_SQUARES[0];
-  s.tokens.red[0]=safe; s.tokens.blue[0]=globalSquare("blue",(safe-26+52)%52);
-  const after=moveToken({...s,turn:"red",pendingDice:1,legalMoves:[{token:0,type:"move",from:safe,to:safe+1}]},0);
+  s.tokens.red[0]=safe-1; s.tokens.blue[0]=(safe-26+52)%52;
+  const after=moveToken({...s,turn:"red",pendingDice:1,legalMoves:[{token:0,type:"move",from:safe-1,to:safe}]},0);
   assert.notEqual(after.tokens.blue[0],-1);
 });
 test("captures an opponent on an unsafe square", () => {
-  const s=createGame(); s.tokens.red[0]=4; s.tokens.blue[0]=globalSquare("blue",4);
+  const s=createGame(); s.tokens.red[0]=4; s.tokens.blue[0]=(6-26+52)%52;
   s.pendingDice=2; s.legalMoves=[{token:0,type:"move",from:4,to:6}];
   const after=moveToken(s,0); assert.equal(after.tokens.blue[0],-1); assert.deepEqual(after.lastAction.captured,[0]);
 });
