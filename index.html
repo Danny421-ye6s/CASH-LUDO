@@ -164,7 +164,7 @@ $("rollBtn").onclick=()=>{
  }catch(error){say(error.message);}
 };
 $("soundBtn").onclick=()=>{soundOn=!soundOn;$("soundBtn").textContent="Sound: "+(soundOn?"On":"Off");if(soundOn)tone(660,.1);};
-$("newBtn").onclick=()=>{state=createGame({playerCount:Number($("playerCount").value)});lastDice=null;$("dice").textContent="—";$("diceCaption").textContent="Red starts. Roll a six to bring a token out of base.";say("New '+state.playerCount+'-player game started. Red plays first.");render();};
+$("newBtn").onclick=()=>{state=createGame({playerCount:Number($("playerCount").value)});lastDice=null;$("dice").textContent="—";$("diceCaption").textContent="Red starts. Roll a six to bring a token out of base.";say("New "+state.playerCount+"-player game started. Red plays first.");render();};
 render();
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}</script>
