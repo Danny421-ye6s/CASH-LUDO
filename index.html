@@ -8,23 +8,23 @@
 <title>CASH LUDO</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <style>
-:root{color-scheme:dark;--bg:#071326;--panel:#10213a;--gold:#e9bd62;--muted:#9aabc1;--line:#2b405d;--red:#f06464;--blue:#58a9ff}
+:root{color-scheme:dark;--bg:#071326;--panel:#10213a;--gold:#e9bd62;--muted:#9aabc1;--line:#2b405d;--red:#f06464;--blue:#58a9ff;--green:#52c58a;--yellow:#f2c94c}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#20395d,#071326 58%);color:#f5f7fb;font:15px system-ui,Arial,sans-serif;min-height:100vh}
 header{display:flex;justify-content:space-between;align-items:center;padding:15px max(16px,env(safe-area-inset-left));border-bottom:1px solid var(--line);background:#071326cc;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}
 .brand{font-weight:950;letter-spacing:3px;color:var(--gold);font-size:21px}.pill{border:1px solid #69552e;color:var(--gold);padding:7px 11px;border-radius:30px;font-size:11px;font-weight:800}
 main{max-width:920px;margin:auto;padding:20px 14px 48px}.hero{text-align:center;margin:9px 0 18px}.hero h1{font-size:clamp(26px,6vw,40px);margin:0 0 5px}.hero p{color:var(--muted);margin:0;font-size:14px}
-.panel{background:linear-gradient(145deg,#142640,#0c192d);border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 12px 30px #0003}.game-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.player{display:flex;align-items:center;gap:8px;font-weight:850}.dot{width:12px;height:12px;border-radius:50%;display:inline-block}.red-dot{background:var(--red)}.blue-dot{background:var(--blue)}.turn-label{font-size:12px;color:var(--gold);font-weight:800}
+.panel{background:linear-gradient(145deg,#142640,#0c192d);border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 12px 30px #0003}.game-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.player{display:flex;align-items:center;gap:8px;font-weight:850}.dot{width:12px;height:12px;border-radius:50%;display:inline-block}.red-dot{background:var(--red)}.blue-dot{background:var(--blue)}.green-dot{background:var(--green)}.yellow-dot{background:var(--yellow)}.turn-label{font-size:12px;color:var(--gold);font-weight:800}
 .board-wrap{max-width:560px;margin:0 auto;background:#081629;padding:8px;border:1px solid #344a68;border-radius:14px}
 .board{display:grid;grid-template-columns:repeat(15,minmax(0,1fr));grid-template-rows:repeat(15,minmax(0,1fr));aspect-ratio:1;gap:2px;background:#14243a}
 .cell{position:relative;min-width:0;min-height:0;background:#1c304a;border-radius:2px;display:grid;place-items:center}
 .cell.track{background:#d9e2ec;color:#1b2b40}.cell.safe:after{content:"✦";font-size:clamp(7px,1.6vw,13px);color:#a37a2f}
-.cell.red-lane{background:#f4a0a0}.cell.blue-lane{background:#9bcfff}
-.cell.base-red{background:#7c3441}.cell.base-blue{background:#245987}
-.cell.base-red:before,.cell.base-blue:before{content:"";position:absolute;inset:14%;border-radius:8px;background:#f7f1e7}
+.cell.red-lane{background:#f4a0a0}.cell.blue-lane{background:#9bcfff}.cell.green-lane{background:#9be0bd}.cell.yellow-lane{background:#f6df8c}
+.cell.base-red{background:#7c3441}.cell.base-blue{background:#245987}.cell.base-green{background:#236849}.cell.base-yellow{background:#80651f}
+.cell.base-red:before,.cell.base-blue:before,.cell.base-green:before,.cell.base-yellow:before{content:"";position:absolute;inset:14%;border-radius:8px;background:#f7f1e7}
 .cell.center{background:conic-gradient(from 45deg,#f06464 0 25%,#58a9ff 0 50%,#e9bd62 0 75%,#58a9ff 0);border-radius:2px}
 .cell.start-red{background:#f06464}.cell.start-blue{background:#58a9ff}
 .token{z-index:1;width:72%;height:72%;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 5px #0008;display:grid;place-items:center;color:#142238;font-size:clamp(7px,1.5vw,12px);font-weight:950}
-.token.red{background:#ff7777}.token.blue{background:#73baff}
+.token.red{background:#ff7777}.token.blue{background:#73baff}.token.green{background:#75dfa9}.token.yellow{background:#ffe27b}
 .token-stack{position:absolute;inset:0;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:1px;z-index:2}
 .token-stack .token{width:46%;height:46%}
 .token.selectable{outline:3px solid var(--gold);animation:tokenGlow .85s ease-in-out infinite alternate;cursor:pointer}
@@ -47,20 +47,20 @@ button:disabled{opacity:.4;cursor:not-allowed}.primary{background:linear-gradien
 <body>
 <header><div class="brand">✦ CASH LUDO</div><div class="pill">VIRTUAL COINS ONLY</div></header>
 <main>
-<section class="hero"><h1>Roll. Race. Win.</h1><p>Classic four-token Ludo · Local two-player practice</p></section>
+<section class="hero"><h1>Roll. Race. Win.</h1><p>Classic Ludo · Choose 2 or 4 players</p></section>
 <div class="layout">
 <section class="panel">
-<div class="game-top"><div class="player"><span class="dot red-dot"></span> RED <span class="turn-label" id="redTurn"></span></div><div class="player"><span class="dot blue-dot"></span> BLUE <span class="turn-label" id="blueTurn"></span></div></div>
+<div class="game-top" id="playersBar"></div>
 <div class="board-wrap"><div class="board" id="board" aria-label="Ludo board"></div></div>
 <div class="legend"><span>✦ Safe square</span><span>Exact roll to finish</span></div>
 </section>
 <aside class="panel side">
-<h2 class="section-title" id="turnTitle">Red player's turn</h2>
+<h2 class="section-title" id="turnTitle">Red player's turn</h2><label for="playerCount" style="display:block;color:var(--muted);font-size:12px;margin:8px 0 5px">Players in this game</label><select id="playerCount" class="secondary" style="width:100%;padding:11px"><option value="2">2 players — Red vs Blue</option><option value="4">4 players — Red, Green, Blue, Yellow</option></select>
 <div class="dice-area"><div class="dice" id="dice" aria-label="Dice">—</div><div class="dice-caption" id="diceCaption">Start a new game, then roll the dice.</div></div>
 <div class="controls"><button class="primary" id="rollBtn">Roll dice</button><button class="secondary" id="newBtn">New game</button></div><button class="secondary" id="soundBtn" style="width:100%;margin-top:9px">Sound: On</button>
 <div class="moves" id="moves"></div>
 <div class="status" id="status" aria-live="polite">Red starts. Roll a six to bring a token out of base.</div>
-<p class="note">Rules in this local build: four tokens per player, six to leave base, safe squares, captures, extra roll on six, and an exact roll to finish. Three consecutive sixes forfeit the turn. Online rooms are not connected yet.</p>
+<p class="note">Rules in this local build: two or four players, four tokens each, six to leave base, safe squares, captures, extra roll on six, and an exact roll to finish. Three consecutive sixes forfeit the turn. Online rooms are not connected yet.</p>
 </aside>
 </div>
 </main>
@@ -73,20 +73,17 @@ for(let c=1;c<=13;c++) track.push([0,c]);
 for(let r=1;r<=13;r++) track.push([r,14]);
 for(let c=13;c>=1;c--) track.push([14,c]);
 for(let r=13;r>=1;r--) track.push([r,0]);
-const redLane=Array.from({length:6},(_,i)=>[i+1,i+1]);
-const blueLane=Array.from({length:6},(_,i)=>[13-i,13-i]);
-const baseSpots={red:[[2,3],[3,2],[3,4],[4,3]],blue:[[10,11],[11,10],[11,12],[12,11]]};
+const lanes={red:Array.from({length:6},(_,i)=>[i+1,i+1]),green:Array.from({length:6},(_,i)=>[i+1,13-i]),blue:Array.from({length:6},(_,i)=>[13-i,13-i]),yellow:Array.from({length:6},(_,i)=>[13-i,i+1])};
+const baseSpots={red:[[2,3],[3,2],[3,4],[4,3]],green:[[2,11],[3,10],[3,12],[4,11]],blue:[[10,11],[11,10],[11,12],[12,11]],yellow:[[10,3],[11,2],[11,4],[12,3]]};
 const cellAt=new Map();
 for(let r=0;r<15;r++)for(let c=0;c<15;c++){
  const el=document.createElement("div");el.className="cell";el.style.gridRow=String(r+1);el.style.gridColumn=String(c+1);board.append(el);cellAt.set(r+","+c,el);
 }
-track.forEach((p,i)=>{const el=cellAt.get(p.join(","));el.classList.add("track");if(SAFE_SQUARES.includes(i))el.classList.add("safe");if(i===0)el.classList.add("start-red");if(i===26)el.classList.add("start-blue");});
-redLane.forEach(p=>cellAt.get(p.join(",")).classList.add("red-lane"));
-blueLane.forEach(p=>cellAt.get(p.join(",")).classList.add("blue-lane"));
-baseSpots.red.forEach(p=>cellAt.get(p.join(",")).classList.add("base-red"));
-baseSpots.blue.forEach(p=>cellAt.get(p.join(",")).classList.add("base-blue"));
+track.forEach((p,i)=>{const el=cellAt.get(p.join(","));el.classList.add("track");if(SAFE_SQUARES.includes(i))el.classList.add("safe");if(i===0)el.classList.add("start-red");if(i===13)el.classList.add("start-green");if(i===26)el.classList.add("start-blue");if(i===39)el.classList.add("start-yellow");});
+for(const color of Object.keys(lanes))lanes[color].forEach(p=>cellAt.get(p.join(",")).classList.add(color+"-lane"));
+for(const color of Object.keys(baseSpots))baseSpots[color].forEach(p=>cellAt.get(p.join(",")).classList.add("base-"+color));
 cellAt.get("7,7").classList.add("center");
-let state=createGame();
+let state=createGame({playerCount:2});
 let soundOn=true;
 let audioContext=null;
 function tone(frequency,duration=0.11,type="sine",volume=0.045){
@@ -112,7 +109,7 @@ let lastDice=null;
 function coordsFor(color,progress,token){
  if(progress===-1)return baseSpots[color][token];
  if(progress===58)return [7,7];
- if(progress>=52)return (color==="red"?redLane:blueLane)[progress-52];
+ if(progress>=52)return lanes[color][progress-52];
  return track[globalSquare(color,progress)];
 }
 function addToken(color,token,progress){
@@ -126,10 +123,9 @@ function addToken(color,token,progress){
 }
 function render(){
  document.querySelectorAll(".token-stack").forEach(el=>el.remove());
- for(const color of ["red","blue"])getPlayerTokenStatus(state,color).forEach(t=>addToken(color,t.token,t.progress));
+ for(const color of state.playerOrder)getPlayerTokenStatus(state,color).forEach(t=>addToken(color,t.token,t.progress));
+ $("playersBar").innerHTML=state.playerOrder.map(color=>'<div class="player"><span class="dot '+color+'-dot"></span>'+color.toUpperCase()+' <span class="turn-label">'+(state.turn===color&&!state.winner?"YOUR TURN":"")+'</span></div>').join("");
  $("turnTitle").textContent=state.winner?state.winner.toUpperCase()+" WINS!":state.turn[0].toUpperCase()+state.turn.slice(1)+" player's turn";
- $("redTurn").textContent=state.turn==="red"&&!state.winner?"YOUR TURN":"";
- $("blueTurn").textContent=state.turn==="blue"&&!state.winner?"YOUR TURN":"";
  $("rollBtn").disabled=state.pendingDice!==null||state.status!=="active";
  const moves=$("moves");moves.innerHTML="";
  if(state.pendingDice!==null){
@@ -146,7 +142,7 @@ function playMove(token){
   const before=state;state=moveToken(state,token);
   playSound(state.lastAction.captured.length?"capture":state.winner?"win":"move");
   const action=state.lastAction;
-  const captureText=action.captured.length?" Captured "+action.captured.length+" blue/red token(s).":"";
+  const captureText=action.captured.length?" Captured "+action.captured.map(x=>x.color.toUpperCase()+" token "+(x.token+1)).join(", ")+".":"";
   if(state.winner)say(state.winner.toUpperCase()+" has brought all four tokens home and wins!");
   else if(state.turn===before.turn)say(before.turn.toUpperCase()+" moved token "+(token+1)+" and earned another roll."+captureText);
   else say(before.turn.toUpperCase()+" moved token "+(token+1)+"."+captureText+" "+state.turn.toUpperCase()+" plays next.");
@@ -168,7 +164,7 @@ $("rollBtn").onclick=()=>{
  }catch(error){say(error.message);}
 };
 $("soundBtn").onclick=()=>{soundOn=!soundOn;$("soundBtn").textContent="Sound: "+(soundOn?"On":"Off");if(soundOn)tone(660,.1);};
-$("newBtn").onclick=()=>{state=createGame();lastDice=null;$("dice").textContent="—";$("diceCaption").textContent="Red starts. Roll a six to bring a token out of base.";say("New game started. Red plays first.");render();};
+$("newBtn").onclick=()=>{state=createGame({playerCount:Number($("playerCount").value)});lastDice=null;$("dice").textContent="—";$("diceCaption").textContent="Red starts. Roll a six to bring a token out of base.";say("New '+state.playerCount+'-player game started. Red plays first.");render();};
 render();
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}</script>
