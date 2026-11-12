@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#081426"><meta name="description" content="Cash Ludo — original play-money Ludo prototype">
+<title>CASH LUDO</title>
+<style>
+:root{--bg:#071326;--panel:#101f36;--gold:#e9bd62;--muted:#9aabc1;--line:#263954;--red:#f06464;--blue:#58a9ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#1b3151,#071326 52%);color:#f5f7fb;font:15px system-ui,Arial;min-height:100vh}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px max(16px,env(safe-area-inset-left));border-bottom:1px solid #263954}
+.brand{font-weight:900;letter-spacing:3px;color:var(--gold);font-size:22px}.pill{border:1px solid #69552e;color:var(--gold);padding:7px 11px;border-radius:30px;font-size:12px}
+main{max-width:900px;margin:auto;padding:22px 16px 50px}.hero{text-align:center;margin:14px 0 22px}.hero h1{font-size:clamp(27px,6vw,42px);margin:0 0 7px}.hero p{color:var(--muted);margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.card{background:linear-gradient(145deg,#142640,#0d1a2e);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 30px #0003}.card h2{font-size:17px;margin:0 0 8px}.muted{color:var(--muted);font-size:13px;line-height:1.5}
+button,input{font:inherit}button{background:linear-gradient(135deg,#f0ce82,#c8933e);color:#172238;border:0;border-radius:12px;padding:12px 15px;font-weight:800;cursor:pointer;width:100%;margin-top:10px}button.secondary{background:#1b2d47;color:#eaf0f8;border:1px solid #39516f}button:disabled{opacity:.45;cursor:not-allowed}
+input{width:100%;background:#081629;color:white;border:1px solid #354b68;border-radius:10px;padding:12px;margin-top:10px;outline:none}
+.status{padding:10px;border-radius:10px;background:#09182b;color:#c4d2e4;margin-top:12px;font-size:13px;min-height:40px}
+.game{margin-top:16px;display:none}.board{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-width:390px;margin:15px auto}.cell{aspect-ratio:1;background:#20344f;border:1px solid #405675;border-radius:8px;display:grid;place-items:center;font-size:12px;color:#c7d5e8}.cell.red{background:#542c3a}.cell.blue{background:#183f67}.cell.gold{background:#70552a;color:#fff}.dice{font-size:42px;text-align:center;color:var(--gold);font-weight:900}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+footer{text-align:center;color:#71849e;font-size:12px;padding:24px}
+</style></head>
+<body>
+<header><div class="brand">✦ CASH LUDO</div><div class="pill">PLAY • HAVE FUN</div></header>
+<main><section class="hero"><h1>Roll. Race. Win.</h1><p>Original Ludo fun with friends — virtual coins only.</p></section>
+<div class="grid">
+<section class="card"><h2>🎲 Local 1 versus 1</h2><p class="muted">Play a simple turn-based demo on this device. This is a starter game board, not the complete traditional Ludo rules yet.</p><button id="localBtn">Start local demo</button></section>
+<section class="card"><h2>🔐 Private room</h2><p class="muted">Private room screens are prepared for the online multiplayer milestone. They will work after a secure backend is connected.</p><input id="roomCode" maxlength="6" placeholder="Enter 6-character room code"><button id="joinBtn" class="secondary">Join room (backend needed)</button><button id="createBtn" class="secondary">Create private room (backend needed)</button><div class="status" id="onlineStatus">Online multiplayer is not connected yet. Firebase setup is required.</div></section>
+</div>
+<section class="card game" id="game"><h2 id="turn">Red player's turn</h2><div class="dice" id="dice">—</div><div class="board" id="board"></div><div class="actions"><button id="roll">Roll dice</button><button id="move" class="secondary" disabled>Move token</button></div><div class="status" id="gameStatus">Roll to begin.</div></section>
+</main><footer>Cash Ludo prototype • All coins are virtual • No deposits, wagers or cash prizes</footer>
+<script>
+const $=id=>document.getElementById(id);let turn='Red',rolled=0,steps={Red:0,Blue:0};
+const board=$('board');function draw(){board.innerHTML='';for(let i=0;i<25;i++){let c=document.createElement('div');c.className='cell '+(i%5===2?'gold':'');c.textContent='';if(i===steps.Red%25){c.classList.add('red');c.textContent='R'}if(i===steps.Blue%25){c.classList.add('blue');c.textContent=c.textContent?'R/B':'B'}board.append(c)}$('turn').textContent=turn+" player's turn"}
+$('localBtn').onclick=()=>{$('game').style.display='block';turn='Red';rolled=0;steps={Red:0,Blue:0};$('dice').textContent='—';$('gameStatus').textContent='Local demo started. Red rolls first.';$('move').disabled=true;draw();$('game').scrollIntoView({behavior:'smooth'})};
+$('roll').onclick=()=>{if(rolled)return;rolled=1+Math.floor(Math.random()*6);$('dice').textContent=rolled;$('gameStatus').textContent=turn+' rolled '+rolled+'. Tap Move token.';$('move').disabled=false};
+$('move').onclick=()=>{if(!rolled)return;steps[turn]+=rolled;let who=turn;turn=turn==='Red'?'Blue':'Red';$('gameStatus').textContent=who+' moved '+rolled+' spaces. '+turn+' plays next.';rolled=0;$('dice').textContent='—';$('move').disabled=true;draw()};
+$('createBtn').onclick=$('joinBtn').onclick=()=>{$('onlineStatus').textContent='Not connected: first configure Firebase Authentication and Realtime Database, then implement server-validated room transactions. No room was created or joined.'};
+</script></body></html>
