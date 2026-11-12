@@ -19,10 +19,10 @@ main{max-width:920px;margin:auto;padding:20px 14px 48px}.hero{text-align:center;
 .cell{position:relative;min-width:0;min-height:0;background:#1c304a;border-radius:2px;display:grid;place-items:center}
 .cell.track{background:#d9e2ec;color:#1b2b40}.cell.safe:after{content:"✦";font-size:clamp(7px,1.6vw,13px);color:#a37a2f}
 .cell.red-lane{background:#f4a0a0}.cell.blue-lane{background:#9bcfff}.cell.green-lane{background:#9be0bd}.cell.yellow-lane{background:#f6df8c}
-.cell.base-red{background:#7c3441}.cell.base-blue{background:#245987}.cell.base-green{background:#236849}.cell.base-yellow{background:#80651f}
+.cell.zone-red{background:#38202c}.cell.zone-green{background:#18382f}.cell.zone-blue{background:#192f49}.cell.zone-yellow{background:#40351b}\n .cell.base-red{background:#7c3441}.cell.base-blue{background:#245987}.cell.base-green{background:#236849}.cell.base-yellow{background:#80651f}
 .cell.base-red:before,.cell.base-blue:before,.cell.base-green:before,.cell.base-yellow:before{content:"";position:absolute;inset:14%;border-radius:8px;background:#f7f1e7}
-.cell.center{background:conic-gradient(from 45deg,#f06464 0 25%,#58a9ff 0 50%,#e9bd62 0 75%,#58a9ff 0);border-radius:2px}
-.cell.start-red{background:#f06464}.cell.start-blue{background:#58a9ff}
+.cell.center{background:conic-gradient(from 45deg,#f06464 0 25%,#52c58a 0 50%,#58a9ff 0 75%,#f2c94c 0);border-radius:2px}
+.cell.start-red{background:#f06464}.cell.start-green{background:#52c58a}.cell.start-blue{background:#58a9ff}.cell.start-yellow{background:#f2c94c}
 .token{z-index:1;width:72%;height:72%;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 5px #0008;display:grid;place-items:center;color:#142238;font-size:clamp(7px,1.5vw,12px);font-weight:950}
 .token.red{background:#ff7777}.token.blue{background:#73baff}.token.green{background:#75dfa9}.token.yellow{background:#ffe27b}
 .token-stack{position:absolute;inset:0;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:1px;z-index:2}
@@ -68,18 +68,46 @@ button:disabled{opacity:.4;cursor:not-allowed}.primary{background:linear-gradien
 import {createGame,rollDice,moveToken,getPlayerTokenStatus,globalSquare,SAFE_SQUARES} from "./game-engine.js";
 const $=id=>document.getElementById(id);
 const board=$("board");
-const track=[];
-for(let c=1;c<=13;c++) track.push([0,c]);
-for(let r=1;r<=13;r++) track.push([r,14]);
-for(let c=13;c>=1;c--) track.push([14,c]);
-for(let r=13;r>=1;r--) track.push([r,0]);
-const lanes={red:Array.from({length:6},(_,i)=>[i+1,i+1]),green:Array.from({length:6},(_,i)=>[i+1,13-i]),blue:Array.from({length:6},(_,i)=>[13-i,13-i]),yellow:Array.from({length:6},(_,i)=>[13-i,i+1])};
-const baseSpots={red:[[2,3],[3,2],[3,4],[4,3]],green:[[2,11],[3,10],[3,12],[4,11]],blue:[[10,11],[11,10],[11,12],[12,11]],yellow:[[10,3],[11,2],[11,4],[12,3]]};
+// Standard cross-shaped 52-square route. Rotate it so each colour's
+// start square and final home-lane entrance line up.
+const loop=[
+ [6,1],[6,2],[6,3],[6,4],[6,5],[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],[0,8],
+ [1,8],[2,8],[3,8],[4,8],[5,8],[6,9],[6,10],[6,11],[6,12],[6,13],[6,14],[7,14],[8,14],
+ [8,13],[8,12],[8,11],[8,10],[8,9],[9,8],[10,8],[11,8],[12,8],[13,8],[14,8],[14,7],[14,6],
+ [13,6],[12,6],[11,6],[10,6],[9,6],[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],[7,0],[6,0]
+];
+const track=loop.slice(49).concat(loop.slice(0,49));
+const lanes={
+ red:Array.from({length:6},(_,i)=>[7,i+1]),
+ green:Array.from({length:6},(_,i)=>[i+1,7]),
+ blue:Array.from({length:6},(_,i)=>[7,13-i]),
+ yellow:Array.from({length:6},(_,i)=>[13-i,7])
+};
+const baseSpots={
+ red:[[10,2],[10,4],[12,2],[12,4]],
+ green:[[2,2],[2,4],[4,2],[4,4]],
+ blue:[[2,10],[2,12],[4,10],[4,12]],
+ yellow:[[10,10],[10,12],[12,10],[12,12]]
+};
 const cellAt=new Map();
 for(let r=0;r<15;r++)for(let c=0;c<15;c++){
  const el=document.createElement("div");el.className="cell";el.style.gridRow=String(r+1);el.style.gridColumn=String(c+1);board.append(el);cellAt.set(r+","+c,el);
 }
-track.forEach((p,i)=>{const el=cellAt.get(p.join(","));el.classList.add("track");if(SAFE_SQUARES.includes(i))el.classList.add("safe");if(i===0)el.classList.add("start-red");if(i===13)el.classList.add("start-green");if(i===26)el.classList.add("start-blue");if(i===39)el.classList.add("start-yellow");});
+for(let r=0;r<15;r++)for(let col=0;col<15;col++){
+ const el=cellAt.get(r+","+col);
+ if(r<6&&col<6)el.classList.add("zone-green");
+ else if(r<6&&col>8)el.classList.add("zone-blue");
+ else if(r>8&&col<6)el.classList.add("zone-red");
+ else if(r>8&&col>8)el.classList.add("zone-yellow");
+}
+track.forEach((p,i)=>{
+ const el=cellAt.get(p.join(","));el.classList.add("track");
+ if(SAFE_SQUARES.includes(i))el.classList.add("safe");
+ if(i===0)el.classList.add("start-red");
+ if(i===13)el.classList.add("start-green");
+ if(i===26)el.classList.add("start-blue");
+ if(i===39)el.classList.add("start-yellow");
+});
 for(const color of Object.keys(lanes))lanes[color].forEach(p=>cellAt.get(p.join(",")).classList.add(color+"-lane"));
 for(const color of Object.keys(baseSpots))baseSpots[color].forEach(p=>cellAt.get(p.join(",")).classList.add("base-"+color));
 cellAt.get("7,7").classList.add("center");
