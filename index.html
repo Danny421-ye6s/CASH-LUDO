@@ -244,6 +244,7 @@ cellAt.get("7,7").classList.add("center");
 let state=createGame({playerCount:2});
 let soundOn=true;
 let isRolling=false;
+let isMoving=false;
 let audioContext=null;
 function tone(frequency,duration=0.11,type="sine",volume=0.045){
  if(!soundOn)return;
@@ -283,7 +284,7 @@ function addToken(color,token,progress){
  let stack=el.querySelector(".token-stack");
  if(!stack){stack=document.createElement("div");stack.className="token-stack";el.append(stack);}
  const piece=document.createElement("button");piece.type="button";piece.className="token "+color;piece.setAttribute("aria-label",color+" token");piece.title=color+" token";
- if(color===state.turn&&state.pendingRolls?.length&&state.legalMoves.some(m=>m.token===token)){piece.classList.add("selectable");piece.addEventListener("click",()=>showTokenChoice(piece,token));}
+ if(!isMoving&&color===state.turn&&state.pendingRolls?.length&&state.legalMoves.some(m=>m.token===token)){piece.classList.add("selectable");piece.addEventListener("click",()=>showTokenChoice(piece,token));}
  stack.append(piece);
 }
 function render(){
@@ -295,7 +296,7 @@ function render(){
  $("dockAvatar").textContent=state.turn[0].toUpperCase();
  $("dockHint").textContent=state.winner?"Game complete":state.awaitingBonusRoll?"Six! Roll again":state.pendingRolls?.length?"Choose a token":"Tap dice to play";
  $("rollHistory").innerHTML=(state.pendingRolls||[]).map((v,i)=>`<span class="roll-chip" title="Roll ${i+1}">${v}</span>`).join("");
- $("dice").disabled=isRolling||(!state.awaitingBonusRoll&&!!state.pendingRolls?.length)||state.status!=="active";
+ $("dice").disabled=isRolling||isMoving||(!state.awaitingBonusRoll&&!!state.pendingRolls?.length)||state.status!=="active";
  $("diceCaption").textContent=state.winner?"Game finished":state.awaitingBonusRoll?"Six! Tap dice to roll again":state.pendingRolls?.length?"Tap a token, then choose a roll":state.turn[0].toUpperCase()+state.turn.slice(1)+": tap the dice";
  $("moves").innerHTML="";
 }
@@ -313,6 +314,8 @@ function showTokenChoice(piece,token){
 }
 function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
 async function playMove(token,diceValue){
+ if(isMoving||isRolling)return;
+ isMoving=true;
  try{
   const before=state;
   const move=state.legalMoves.find(m=>m.token===token&&m.dice===diceValue);
@@ -340,6 +343,7 @@ async function playMove(token,diceValue){
   else say(before.turn.toUpperCase()+" moved "+diceValue+" spaces."+captureText+" "+state.turn.toUpperCase()+" plays next.");
   render();
  }catch(error){displayProgress=null;render();say(error.message);}
+ finally{isMoving=false;render();}
 }
 
 const pipPositions={1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
@@ -350,7 +354,7 @@ function setDiceFace(value){
  });
 }
 $("dice").onclick=()=>{
- if(isRolling||(state.pendingRolls?.length&&!state.awaitingBonusRoll)||state.status!=="active")return;
+ if(isRolling||isMoving||(state.pendingRolls?.length&&!state.awaitingBonusRoll)||state.status!=="active")return;
  isRolling=true;$("dice").disabled=true;
  $("dice").classList.remove("rolling");void $("dice").offsetWidth;$("dice").classList.add("rolling");
  playSound("roll");
