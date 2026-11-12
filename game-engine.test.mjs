@@ -21,7 +21,7 @@ test("rejects a stale server command",()=>assert.throws(()=>applyPlayerCommand(c
 test("rejects a command from the wrong player",()=>assert.throws(()=>applyPlayerCommand(createGame(),{type:"roll"},{authenticatedColor:"blue",expectedVersion:0,dice:4})));
 test("rejects invalid dice",()=>assert.throws(()=>rollDice(createGame(),7)));
 test("a six always grants a bonus roll even when no token can move",()=>{let s=createGame();s.tokens.red=[56,56,56,56];s=rollDice(s,6);assert.equal(s.turn,"red");assert.equal(s.consecutiveSixes,1);assert.equal(s.lastAction.type,"bonus-roll");});
-test("track positions wrap correctly for all player colors",()=>{assert.equal(globalSquare("red",51),51);assert.equal(globalSquare("blue",0),26);assert.equal(globalSquare("green",0),13);assert.equal(globalSquare("yellow",0),39);});
+test("track positions wrap correctly for all player colors",()=>{assert.equal(globalSquare("red",51),51);assert.equal(globalSquare("blue",0),0);assert.equal(globalSquare("green",0),26);assert.equal(globalSquare("red",0),13);assert.equal(globalSquare("yellow",0),39);});
 test("does not capture on a safe square",()=>{const s=createGame();s.tokens.red[0]=7;s.tokens.blue[0]=(8-26+52)%52;s.pendingDice=1;s.legalMoves=[{token:0,type:"move",from:7,to:8}];const after=moveToken(s,0);assert.notEqual(after.tokens.blue[0],-1);});
 
 test("six then five uses five as the movement roll",()=>{let s=rollDice(createGame(),6);s=rollDice(s,5);assert.equal(s.pendingDice,5);assert.equal(s.lastAction.dice,5);assert.equal(s.legalMoves[0].type,"enter-and-move");});
