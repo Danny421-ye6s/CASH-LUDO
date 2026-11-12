@@ -155,7 +155,7 @@ button{border-radius:24px}
 .dock-player strong{font-size:13px;color:#fff}.dock-player small{font-size:10px;color:#d4f1ff}
 .player-dock .dice-area{margin:0 0 0 auto;gap:8px}
 .player-dock .dice{width:56px;height:56px;flex:0 0 56px}
-.player-dock .dice-caption{max-width:90px;font-size:10px}.roll-history{display:flex;gap:5px;align-items:center;margin-left:auto}.roll-chip{width:29px;height:29px;border-radius:7px;background:#fff;color:#16344c;border:2px solid #ffe17b;display:grid;place-items:center;font-size:14px;font-weight:950;box-shadow:0 2px 0 #8aa5b5}.roll-chip.used{opacity:.45;filter:grayscale(1)}.token-choice{position:absolute;z-index:20;left:50%;bottom:calc(100% + 5px);transform:translateX(-50%);display:flex;gap:4px;padding:5px;background:#063e68;border:2px solid #ffe17b;border-radius:9px;box-shadow:0 4px 12px #001c35aa;white-space:nowrap}.token-choice button{padding:6px 9px;border-radius:6px;background:#fff;color:#073b61;font-size:11px}.token-choice:after{content:"";position:absolute;top:100%;left:50%;border:6px solid transparent;border-top-color:#ffe17b;margin-left:-6px}
+.player-dock .dice-caption{max-width:90px;font-size:10px}.roll-history{display:flex;gap:5px;align-items:center;margin-left:auto}.roll-chip{width:29px;height:29px;border-radius:7px;background:#fff;color:#16344c;border:2px solid #ffe17b;display:grid;place-items:center;font-size:14px;font-weight:950;box-shadow:0 2px 0 #8aa5b5}.roll-chip.used{opacity:.45;filter:grayscale(1)}.token-choice{position:fixed;z-index:9999;left:50%;top:10px;transform:translate(-50%,-100%);display:flex;gap:4px;padding:5px;background:#063e68;border:2px solid #ffe17b;border-radius:9px;box-shadow:0 4px 12px #001c35aa;white-space:nowrap}.token-choice button{padding:6px 9px;border-radius:6px;background:#fff;color:#073b61;font-size:11px}.token-choice:after{content:"";position:absolute;top:100%;left:50%;border:6px solid transparent;border-top-color:#ffe17b;margin-left:-6px}
 @media(max-width:380px){.player-dock{padding:6px 8px;gap:7px}.dock-avatar{width:36px;height:36px}.player-dock .dice{width:50px;height:50px;flex-basis:50px}.player-dock .dice-caption{max-width:85px}}
 </style>
 </head>
@@ -283,8 +283,8 @@ function render(){
  $("dockAvatar").textContent=state.turn[0].toUpperCase();
  $("dockHint").textContent=state.winner?"Game complete":state.pendingRolls?.length?"Choose a token":"Tap dice to play";
  $("rollHistory").innerHTML=(state.pendingRolls||[]).map((v,i)=>`<span class="roll-chip" title="Roll ${i+1}">${v}</span>`).join("");
- $("dice").disabled=isRolling||!!state.pendingRolls?.length||state.status!=="active";
- $("diceCaption").textContent=state.winner?"Game finished":state.pendingRolls?.length?"Tap a token, then choose a roll":state.turn[0].toUpperCase()+state.turn.slice(1)+": tap the dice";
+ $("dice").disabled=isRolling||(!state.awaitingBonusRoll&&!!state.pendingRolls?.length)||state.status!=="active";
+ $("diceCaption").textContent=state.winner?"Game finished":state.awaitingBonusRoll?"Six! Tap dice to roll again":state.pendingRolls?.length?"Tap a token, then choose a roll":state.turn[0].toUpperCase()+state.turn.slice(1)+": tap the dice";
  $("moves").innerHTML="";
 }
 function say(message){$("status").textContent=message;}
@@ -294,7 +294,10 @@ function showTokenChoice(piece,token){
  const choices=document.createElement("div");choices.className="token-choice";
  const values=[...new Set(state.legalMoves.filter(m=>m.token===token).map(m=>m.dice))];
  values.forEach(value=>{const button=document.createElement("button");button.textContent="Move "+value;button.onclick=(event)=>{event.stopPropagation();choices.remove();playMove(token,value);};choices.append(button);});
- piece.parentElement.style.position="relative";piece.parentElement.append(choices);
+ const rect=piece.getBoundingClientRect();
+ choices.style.left=Math.max(90,Math.min(window.innerWidth-90,rect.left+rect.width/2))+"px";
+ choices.style.top=Math.max(12,rect.top-8)+"px";
+ document.body.append(choices);
 }
 function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
 async function playMove(token,diceValue){
@@ -334,7 +337,7 @@ function setDiceFace(value){
  });
 }
 $("dice").onclick=()=>{
- if(isRolling||state.pendingRolls?.length||state.status!=="active")return;
+ if(isRolling||(state.pendingRolls?.length&&!state.awaitingBonusRoll)||state.status!=="active")return;
  isRolling=true;$("dice").disabled=true;
  $("dice").classList.remove("rolling");void $("dice").offsetWidth;$("dice").classList.add("rolling");
  playSound("roll");
