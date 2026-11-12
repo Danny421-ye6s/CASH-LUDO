@@ -1,21 +1,21 @@
-# CASH LUDO — next build checklist
+# CASH LUDO — build roadmap
 
 ## Current repository state
 - [x] GitHub repository connected and source files committed.
-- [x] Navy/gold responsive starter screen.
-- [x] Basic local dice/turn demonstration.
-- [x] PWA manifest and service-worker starter.
-- [x] Initial unit-test file for the small rules module.
-- [x] Server-authoritative architecture decision documented.
-- [ ] Replace toy board with complete agreed Ludo rules and 4 pieces per player.
-- [ ] TypeScript domain engine with exhaustive legal-move tests.
-- [ ] Trusted backend functions for room creation/join and game commands.
-- [ ] Firebase project configuration and security rules.
-- [ ] Two-device private-room integration test.
-- [ ] Public matchmaking, accounts/profile, leaderboard, voice chat.
+- [x] Navy/gold responsive application shell and PWA starter.
+- [x] Agreed rules: two local players, four tokens each, six to leave base, 52-square track, six-square home lane, exact roll to finish, safe squares, captures, extra roll on six, and three consecutive sixes forfeit.
+- [x] Pure JavaScript game engine with versioned commands and legal-move checks.
+- [x] Automated Node test suite added for core game rules.
+- [x] Local board UI connected to the game engine (no online play yet).
+- [ ] Run the test suite in GitHub Actions and resolve any failures.
+- [ ] Review board layout and rule variants on real Android screen sizes.
+- [ ] Add secure server-authoritative room creation/join and game commands.
+- [ ] Configure Firebase Authentication, Realtime Database, and security rules.
+- [ ] Test a private room on two devices.
+- [ ] Add public matchmaking, profiles, leaderboard, and optional voice features.
 
-## Do not misrepresent
-The current local demo is not a complete classic Ludo game. The online room buttons do not create or join rooms. A live backend must be configured before online play can work.
+## Important boundaries
+The local game is a practice prototype. Dice are currently generated in the browser and must not be trusted for competitive online play. Online room buttons and multiplayer are not implemented. No deposits, withdrawals, wagers, paid entry, or cash prizes are enabled. Do not claim support for 100,000 concurrent players until architecture and load testing demonstrate it.
 
-## First decision needed
-Before implementing the full rules engine, confirm the intended variant: classic 4-token Ludo (each player has four tokens, needs a six to leave base, exact roll to finish, safe squares, captures, and six grants another roll) or a different ruleset. Record any house rules explicitly and test them.
+## Rules note
+This is the agreed two-player classic-style ruleset. Safe-square placement and stacking rules can differ between regional Ludo variants. The current engine prevents a player's token from landing on another of their own tokens; this is a documented house rule for this version.
