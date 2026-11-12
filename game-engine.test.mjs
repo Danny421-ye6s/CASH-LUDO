@@ -1,5 +1,42 @@
-import test from "node:test";import assert from "node:assert/strict";import {createGame,roll,move} from "./game-engine.js";
-test("six gives the same player another turn",()=>{let s=move(roll(createGame(),6));assert.equal(s.turn,"red");assert.equal(s.progress.red,6)});
-test("non-six passes turn",()=>{let s=move(roll(createGame(),3));assert.equal(s.turn,"blue");assert.equal(s.progress.red,3)});
-test("rejects invalid dice",()=>assert.throws(()=>roll(createGame(),0)));
-test("requires a roll before moving",()=>assert.throws(()=>move(createGame())));
+import test from "node:test";
+import assert from "node:assert/strict";
+import {createGame, rollDice, moveToken, getLegalMoves, globalSquare, FINISH_PROGRESS, SAFE_SQUARES, applyPlayerCommand} from "./game-engine.js";
+
+const enterRed = () => moveToken(rollDice(createGame(), 6), 0);
+test("starts with four tokens in each base", () => {
+  const s=createGame(); assert.deepEqual(s.tokens.red,[-1,-1,-1,-1]); assert.deepEqual(s.tokens.blue,[-1,-1,-1,-1]);
+});
+test("only a six releases a token", () => {
+  assert.deepEqual(getLegalMoves(createGame(),5),[]);
+  assert.equal(getLegalMoves(createGame(),6)[0].type,"enter");
+});
+test("six releases a token and grants another turn", () => {
+  const s=enterRed(); assert.equal(s.tokens.red[0],0); assert.equal(s.turn,"red");
+});
+test("a non-six moves token and passes turn", () => {
+  const s=moveToken(rollDice(enterRed(),3),0); assert.equal(s.tokens.red[0],3); assert.equal(s.turn,"blue");
+});
+test("requires an exact roll to finish", () => {
+  let s=createGame(); s.tokens.red[0]=FINISH_PROGRESS-2; s.pendingDice=3;
+  s.legalMoves=getLegalMoves(s,3); assert.equal(s.legalMoves.length,0);
+  s.pendingDice=2; s.legalMoves=getLegalMoves(s,2); assert.equal(s.legalMoves[0].type,"finish");
+});
+test("three consecutive sixes forfeit the turn", () => {
+  let s=createGame(); s=rollDice(s,6); s=moveToken(s,0); s=rollDice(s,6); s=moveToken(s,0); s=rollDice(s,6);
+  assert.equal(s.turn,"blue"); assert.equal(s.consecutiveSixes,0); assert.equal(s.lastAction.type,"three-sixes-forfeit");
+});
+test("safe squares prevent capture", () => {
+  const s=createGame(); const safe=SAFE_SQUARES[0];
+  s.tokens.red[0]=safe; s.tokens.blue[0]=globalSquare("blue",(safe-26+52)%52);
+  const after=moveToken({...s,turn:"red",pendingDice:1,legalMoves:[{token:0,type:"move",from:safe,to:safe+1}]},0);
+  assert.notEqual(after.tokens.blue[0],-1);
+});
+test("captures an opponent on an unsafe square", () => {
+  const s=createGame(); s.tokens.red[0]=4; s.tokens.blue[0]=globalSquare("blue",4);
+  s.pendingDice=2; s.legalMoves=[{token:0,type:"move",from:4,to:6}];
+  const after=moveToken(s,0); assert.equal(after.tokens.blue[0],-1); assert.deepEqual(after.lastAction.captured,[0]);
+});
+test("rejects moving a token that is not legal", () => assert.throws(()=>moveToken(rollDice(createGame(),6),2)));
+test("rejects a stale server command", () => assert.throws(()=>applyPlayerCommand(createGame(),{type:"roll"},{authenticatedColor:"red",expectedVersion:99,dice:4})));
+test("rejects a command from the wrong player", () => assert.throws(()=>applyPlayerCommand(createGame(),{type:"roll"},{authenticatedColor:"blue",expectedVersion:0,dice:4})));
+test("rejects invalid dice", () => assert.throws(()=>rollDice(createGame(),7)));
