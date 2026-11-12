@@ -157,6 +157,15 @@ button{border-radius:24px}
 .player-dock .dice{width:56px;height:56px;flex:0 0 56px}
 .player-dock .dice-caption{max-width:90px;font-size:10px}.roll-history{display:flex;gap:5px;align-items:center;margin-left:auto}.roll-chip{width:29px;height:29px;border-radius:7px;background:#fff;color:#16344c;border:2px solid #ffe17b;display:grid;place-items:center;font-size:14px;font-weight:950;box-shadow:0 2px 0 #8aa5b5}.roll-chip.used{opacity:.45;filter:grayscale(1)}.token-choice{position:fixed;z-index:9999;left:50%;top:10px;transform:translate(-50%,-100%);display:flex;gap:4px;padding:5px;background:#063e68;border:2px solid #ffe17b;border-radius:9px;box-shadow:0 4px 12px #001c35aa;white-space:nowrap}.token-choice button{padding:6px 9px;border-radius:6px;background:#fff;color:#073b61;font-size:11px}.token-choice:after{content:"";position:absolute;top:100%;left:50%;border:6px solid transparent;border-top-color:#ffe17b;margin-left:-6px}
 @media(max-width:380px){.player-dock{padding:6px 8px;gap:7px}.dock-avatar{width:36px;height:36px}.player-dock .dice{width:50px;height:50px;flex-basis:50px}.player-dock .dice-caption{max-width:85px}}
+
+/* Player panels and feedback styled for a lively mobile match screen */
+.game-top{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
+.player{display:flex;align-items:center;justify-content:flex-start;gap:8px;min-width:0;padding:7px 9px;border-radius:13px;background:linear-gradient(145deg,#07558c,#043c69);border:1px solid #a7e8ff66;}
+.player.active{border:2px solid #ffe17b;background:linear-gradient(145deg,#0b78b8,#064b80);box-shadow:0 0 12px #ffe17b55;}
+.player-avatar{width:32px;height:32px;flex:0 0 32px;border-radius:50%;display:grid;place-items:center;border:2px solid #fff9;color:#12334c;font-weight:950;box-shadow:0 2px 5px #002b4c88;}
+.player-avatar.red{background:radial-gradient(circle at 30% 25%,#ffd0c9,#ef4139 70%)}.player-avatar.blue{background:radial-gradient(circle at 30% 25%,#e0f6ff,#238de8 70%)}.player-avatar.green{background:radial-gradient(circle at 30% 25%,#d8ffe3,#20c96b 70%)}.player-avatar.yellow{background:radial-gradient(circle at 30% 25%,#fffbd4,#f3c12c 70%)}
+.player-meta{display:flex;flex-direction:column;gap:2px;min-width:0}.player-meta strong{font-size:11px;line-height:1;color:#fff}.player-meta small{font-size:9px;line-height:1.1;color:#d5f2ff;font-weight:800;letter-spacing:.35px}.player.active .player-meta small{color:#ffe17b}
+@media(max-width:380px){.player{padding:5px 6px;gap:6px}.player-avatar{width:28px;height:28px;flex-basis:28px}.player-meta strong{font-size:10px}}
 </style>
 </head>
 <body>
@@ -249,12 +258,14 @@ function tone(frequency,duration=0.11,type="sine",volume=0.045){
  }catch(_){}
 }
 function playSound(kind){
- if(kind==="roll"){tone(360,.08,"triangle");setTimeout(()=>tone(520,.1,"triangle"),85);}
- if(kind==="move")tone(620,.09,"sine");
- if(kind==="select")tone(760,.055,"triangle",.035);
- if(kind==="step")tone(430,.045,"square",.018);
- if(kind==="capture"){tone(210,.12,"sawtooth");setTimeout(()=>tone(150,.16,"sawtooth"),100);}
- if(kind==="win"){[523,659,784,1046].forEach((n,i)=>setTimeout(()=>tone(n,.22,"triangle"),i*120));}
+ if(kind==="roll"){for(let i=0;i<8;i++)setTimeout(()=>tone(230+i*27,.035,"square",.022),i*82);}
+ if(kind==="land"){tone(740,.11,"triangle",.05);setTimeout(()=>tone(185,.13,"sine",.035),45);}
+ if(kind==="move"){tone(520,.07,"sine",.035);setTimeout(()=>tone(780,.055,"triangle",.025),55);}
+ if(kind==="select"){tone(680,.045,"triangle",.03);setTimeout(()=>tone(920,.06,"sine",.025),48);}
+ if(kind==="step"){tone(390,.035,"square",.018);setTimeout(()=>tone(560,.03,"sine",.014),28);}
+ if(kind==="capture"){tone(260,.1,"sawtooth",.035);setTimeout(()=>tone(170,.16,"sawtooth",.03),90);setTimeout(()=>tone(110,.12,"triangle",.025),180);}
+ if(kind==="turn"){tone(520,.08,"triangle",.03);setTimeout(()=>tone(660,.1,"triangle",.03),90);}
+ if(kind==="win"){[523,659,784,1046].forEach((n,i)=>setTimeout(()=>tone(n,.22,"triangle",.04),i*120));}
 }
 let lastDice=null;
 let displayProgress=null;
@@ -277,7 +288,7 @@ function addToken(color,token,progress){
 function render(){
  document.querySelectorAll(".token-stack").forEach(el=>el.remove());
  for(const color of state.playerOrder)getPlayerTokenStatus(state,color).forEach(t=>addToken(color,t.token,displayProgress&&color===state.turn&&displayProgress.token===t.token?displayProgress.progress:t.progress));
- $("playersBar").innerHTML=state.playerOrder.map(color=>'<div class="player"><span class="dot '+color+'-dot"></span>'+color.toUpperCase()+' <span class="turn-label">'+(state.turn===color&&!state.winner?"● PLAYING":"")+'</span></div>').join("");
+ $("playersBar").innerHTML=state.playerOrder.map(color=>'<div class="player '+(state.turn===color&&!state.winner?"active":"")+'"><span class="player-avatar '+color+'">'+color[0].toUpperCase()+'</span><span class="player-meta"><strong>'+color.toUpperCase()+'</strong><small>'+(state.winner===color?"WINNER":state.turn===color?"YOUR TURN":"WAITING")+"</small></span></div>").join("");
  $("turnTitle").textContent=state.winner?state.winner.toUpperCase()+" WINS!":state.turn[0].toUpperCase()+state.turn.slice(1)+" player's turn";
  $("dockName").textContent=state.winner?state.winner.toUpperCase()+" WINS":state.turn[0].toUpperCase()+state.turn.slice(1);
  $("dockAvatar").textContent=state.turn[0].toUpperCase();
@@ -321,6 +332,7 @@ async function playMove(token,diceValue){
   displayProgress=null;
   state=moveToken(state,token,diceValue);
   playSound(state.lastAction.captured.length?"capture":state.winner?"win":"move");
+  if(!state.winner)playSound("turn");
   const action=state.lastAction;
   const captureText=action.captured.length?" Captured an opponent token.":"";
   if(state.winner)say(state.winner.toUpperCase()+" wins!");
@@ -347,7 +359,7 @@ $("dice").onclick=()=>{
  setTimeout(()=>{
   clearInterval(animation);
   try{
-   state=rollDice(state,dice);setDiceFace(dice);
+   state=rollDice(state,dice);setDiceFace(dice);playSound("land");
    if(state.lastAction.type==="three-sixes-forfeit")say("Three sixes! "+state.lastAction.player.toUpperCase()+" loses the turn.");
    else if(state.lastAction.type==="bonus-roll")say("You rolled a SIX! Your six is saved. Tap the dice again to roll your bonus number.");
    else if(state.lastAction.type==="no-legal-move")say(state.lastAction.player.toUpperCase()+" rolled "+dice+" but has no legal move. "+state.turn.toUpperCase()+" plays next.");
