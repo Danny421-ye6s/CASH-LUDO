@@ -15,7 +15,7 @@ test("a normal move ends the turn",()=>{let s=createGame();s.tokens.red[0]=2;s=r
 test("a six with no token on track still grants a bonus roll",()=>{let s=createGame();s.tokens.red=[56,56,56,56];s=rollDice(s,6);assert.equal(s.turn,"red");assert.equal(s.awaitingBonusRoll,true);});
 test("no legal move passes the turn",()=>{let s=createGame();s.tokens.red=[56,56,56,56];s=rollDice(s,4);assert.equal(s.turn,"blue");assert.equal(s.pendingRolls.length,0);});
 test("exact roll is required to finish",()=>{let s=createGame();s.tokens.red[0]=FINISH_PROGRESS-2;s=rollDice(s,3);assert.equal(s.legalMoves.length,0);assert.equal(s.turn,"blue");});
-test("safe squares prevent capture",()=>{const s=createGame();s.tokens.red[0]=7;s.tokens.blue[0]=21;s=rollDice(s,1);s=moveToken(s,0,1);assert.notEqual(s.tokens.blue[0],-1);});
+test("safe squares prevent capture",()=>{let s=createGame();s.tokens.red[0]=7;s.tokens.blue[0]=21;s=rollDice(s,1);s=moveToken(s,0,1);assert.notEqual(s.tokens.blue[0],-1);});
 test("captures an opponent on an unsafe square",()=>{const s=createGame();s.tokens.red[0]=4;s.tokens.blue[0]=19;let n=rollDice(s,2);n=moveToken(n,0,2);assert.equal(n.tokens.blue[0],-1);assert.deepEqual(n.lastAction.captured,[{color:"blue",token:0}]);});
 test("four-player games can capture opponents",()=>{const s=createGame({playerCount:4});s.tokens.red[0]=4;s.tokens.green[0]=45;let n=rollDice(s,2);n=moveToken(n,0,2);assert.equal(n.tokens.green[0],-1);});
 test("rejects an unavailable dice value",()=>{let s=createGame();s.tokens.red[0]=1;s=rollDice(s,4);assert.throws(()=>moveToken(s,0,5));});
