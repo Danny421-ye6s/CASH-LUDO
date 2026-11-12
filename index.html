@@ -94,10 +94,59 @@ main{max-width:760px;padding:10px 8px 30px}
 @media(min-width:700px){.layout{display:flex}.side{position:relative;top:auto}.board-wrap{max-width:620px}}
 @media(max-width:380px){main{padding:7px 5px 24px}.panel{padding:8px}.board{gap:2px}}
 
+
+/* Arcade-style match screen refinement */
+body{background:radial-gradient(ellipse at 50% 38%,#36baf4 0%,#087fc8 46%,#03416f 100%);background-attachment:fixed}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.22;background-image:radial-gradient(#c9f3ff 1px,transparent 1px);background-size:28px 28px}
+header{height:54px;padding:8px 14px;background:linear-gradient(180deg,#064b7ddd,#0876b3aa);box-shadow:0 3px 12px #003c6655}
+.brand{font-size:19px;letter-spacing:2px}
+main{max-width:700px;padding:8px 7px 26px}
+.hero{display:none}
+.layout{gap:8px}
+.panel{border-radius:15px;background:linear-gradient(150deg,#0879b9dd,#07548cdd);border:1px solid #a8eaff88;box-shadow:0 5px 15px #00365b66}
+.layout>section.panel{padding:8px 7px 10px}
+.game-top{gap:5px;justify-content:space-evenly;margin:0 0 8px}
+.player{font-size:11px;padding:5px 8px;background:#064b7dcc;border:1px solid #9ce4ff66}
+.turn-label{font-size:9px;color:#ffe18a}
+.dot{width:10px;height:10px;box-shadow:0 0 7px currentColor}
+.board-wrap{max-width:640px;padding:7px;background:linear-gradient(145deg,#73dc50,#238d36);border:3px solid #a4f37a;border-radius:15px;box-shadow:0 5px 0 #17652d,0 10px 18px #003b6266}
+.board{gap:2px;background:#d5e6ed;padding:3px;border-radius:8px;overflow:hidden}
+.cell{border-radius:3px;box-shadow:inset 0 1px 2px #fff,inset 0 -2px 2px #708da044}
+.cell.zone-red,.cell.zone-green,.cell.zone-blue,.cell.zone-yellow{background:linear-gradient(145deg,#7ce65c,#32a83b);box-shadow:inset 0 0 0 1px #aaff82}
+.cell.yard-red-inner,.cell.yard-green-inner,.cell.yard-blue-inner,.cell.yard-yellow-inner{border-radius:5px;box-shadow:inset 0 0 0 1px #ffffff88,inset 0 -2px 3px #0002}
+.cell.yard-red-inner{background:linear-gradient(145deg,#ffaaa0,#ed5148)}
+.cell.yard-green-inner{background:linear-gradient(145deg,#8affaa,#11b95a)}
+.cell.yard-blue-inner{background:linear-gradient(145deg,#86d5ff,#1687df)}
+.cell.yard-yellow-inner{background:linear-gradient(145deg,#fff08c,#efbd20)}
+.cell.base-red:before,.cell.base-blue:before,.cell.base-green:before,.cell.base-yellow:before{inset:10%;border:2px solid #ffffff99;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff,#cbdbe6 70%,#8ea6b8);box-shadow:0 3px 4px #002f5488,inset 0 2px 3px white}
+.cell.center{border:2px solid #f3ffff;box-shadow:0 0 8px #fff8}
+.cell.safe:after{font-size:clamp(8px,2vw,15px);text-shadow:0 1px 2px #49616c}
+.token{border-width:2px 2px 4px;border-color:#fff;box-shadow:0 3px 5px #003052aa,inset 0 2px 3px #fff9}
+.token.selectable{outline:2px solid #ffe17b;outline-offset:1px}
+.legend{font-size:10px;margin:7px 0 0;color:#e5f8ff}
+.side{padding:11px!important}
+.side .section-title{text-align:center;font-size:17px;margin-bottom:8px;text-shadow:0 1px 3px #003b63}
+.side label{color:#d5f2ff!important}
+.dice-area{gap:13px;margin:13px 0}
+.dice{width:70px;height:70px;padding:10px;border-radius:16px;transform-style:preserve-3d;background:linear-gradient(145deg,#fff,#d9e7f0);box-shadow:0 5px 0 #8da2b1,0 8px 13px #00345b88,inset 0 1px 2px white}
+.dice .pip{width:100%;height:100%;background:radial-gradient(circle at 35% 30%,#324b60,#071c30);box-shadow:inset 0 1px 2px #0008}
+.dice-caption{color:#e2f6ff}
+.controls{gap:12px}
+button{border-radius:24px}
+.primary{background:linear-gradient(180deg,#ffe982,#f3b719);box-shadow:0 4px 0 #a56d08,0 5px 9px #00385d77}
+.secondary{background:linear-gradient(180deg,#f2fbff,#b9d9ec);box-shadow:0 3px 0 #628ba4}
+#soundBtn{border-radius:22px}
+.moves{grid-template-columns:repeat(2,1fr)}
+.move-btn{border-radius:12px}
+.status{background:#034b79dd;border:1px solid #a1e4ff66;color:#fff;border-radius:12px}
+.note{color:#d4efff}
+@media(min-width:700px){main{max-width:700px}.layout{display:flex;flex-direction:column}.board-wrap{max-width:640px}.side{width:100%}.moves{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:380px){.board-wrap{padding:5px;border-width:2px}.board{gap:1px;padding:2px}.layout>section.panel{padding:6px}.side{padding:9px!important}}
+
 </style>
 </head>
 <body>
-<header><div class="brand">✦ CASH LUDO</div><div class="pill">VIRTUAL COINS ONLY</div></header>
+<header><div class="brand">✦ CASH LUDO</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:#e5f7ff;background:#064b7dcc;border:1px solid #8bdcff66;padding:6px 10px;border-radius:20px">◉ Spectators&nbsp; 0</span><div class="pill">PRACTICE</div></div></header>
 <main>
 <section class="hero"><h1>Roll. Race. Win.</h1><p>Classic Ludo · Choose 2 or 4 players</p></section>
 <div class="layout">
@@ -209,7 +258,7 @@ function addToken(color,token,progress){
 function render(){
  document.querySelectorAll(".token-stack").forEach(el=>el.remove());
  for(const color of state.playerOrder)getPlayerTokenStatus(state,color).forEach(t=>addToken(color,t.token,t.progress));
- $("playersBar").innerHTML=state.playerOrder.map(color=>'<div class="player"><span class="dot '+color+'-dot"></span>'+color.toUpperCase()+' <span class="turn-label">'+(state.turn===color&&!state.winner?"YOUR TURN":"")+'</span></div>').join("");
+ $("playersBar").innerHTML=state.playerOrder.map(color=>'<div class="player"><span class="dot '+color+'-dot"></span>'+color.toUpperCase()+' <span class="turn-label">'+(state.turn===color&&!state.winner?"● PLAYING":"")+'</span></div>').join("");
  $("turnTitle").textContent=state.winner?state.winner.toUpperCase()+" WINS!":state.turn[0].toUpperCase()+state.turn.slice(1)+" player's turn";
  $("rollBtn").disabled=isRolling||state.pendingDice!==null||state.status!=="active";
  const moves=$("moves");moves.innerHTML="";
