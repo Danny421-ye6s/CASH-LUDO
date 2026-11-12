@@ -303,9 +303,14 @@ async function playMove(token,diceValue){
   const move=state.legalMoves.find(m=>m.token===token&&m.dice===diceValue);
   if(!move)throw new Error("That move is not available");
   let p=move.from;
-  if(move.type==="enter"||move.type==="enter-and-move"){
-    displayProgress={token,progress:move.to};playSound("step");render();await wait(180);
+  if(move.type==="enter"){
+    displayProgress={token,progress:0};playSound("step");render();await wait(180);
   }else{
+    // Leaving base with a saved six and a five counts the start square as
+    // the first of five spaces: animate onto start, then four more squares.
+    if(move.type==="enter-and-move"){
+      p=0;displayProgress={token,progress:p};playSound("step");render();await wait(145);
+    }
     while(p<move.to){
       p++;displayProgress={token,progress:p};playSound("step");render();await wait(145);
     }
