@@ -26,7 +26,7 @@ test("three consecutive sixes forfeit the turn", () => {
   assert.equal(s.turn,"blue"); assert.equal(s.consecutiveSixes,0); assert.equal(s.lastAction.type,"three-sixes-forfeit");
 });
 test("safe squares prevent capture", () => {
-  const s=createGame(); const safe=SAFE_SQUARES[0];
+  const s=createGame(); const safe=SAFE_SQUARES[1];
   s.tokens.red[0]=safe-1; s.tokens.blue[0]=(safe-26+52)%52;
   const after=moveToken({...s,turn:"red",pendingDice:1,legalMoves:[{token:0,type:"move",from:safe-1,to:safe}]},0);
   assert.notEqual(after.tokens.blue[0],-1);
