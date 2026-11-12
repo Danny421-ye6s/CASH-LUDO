@@ -9,7 +9,7 @@ test("four-player games create four sets of four tokens",()=>{const s=createGame
 test("only a six releases a token",()=>{assert.deepEqual(getLegalMoves(createGame(),5),[]);assert.equal(getLegalMoves(createGame(),6)[0].type,"enter");});
 test("six releases a token and grants another turn",()=>{const s=enterRed();assert.equal(s.tokens.red[0],0);assert.equal(s.turn,"red");});
 test("a non-six moves token and passes turn",()=>{const s=moveToken(rollDice(enterRed(),3),0);assert.equal(s.tokens.red[0],3);assert.equal(s.turn,"blue");});
-test("four-player turn order advances clockwise",()=>{let s=createGame({playerCount:4});s=rollDice(s,2);s=rollDice(s,2);assert.equal(s.turn,"green");});
+test("four-player turn order advances clockwise",()=>{let s=createGame({playerCount:4});s=rollDice(s,2);assert.equal(s.turn,"green");});
 test("four-player turn order continues after green",()=>{let s=createGame({playerCount:4});s.tokens.red[0]=0;s.pendingDice=1;s.legalMoves=[{token:0,type:"move",from:0,to:1}];s=moveToken(s,0);assert.equal(s.turn,"green");});
 test("requires an exact roll to finish",()=>{let s=createGame();s.tokens.red[0]=FINISH_PROGRESS-2;s.pendingDice=3;s.legalMoves=getLegalMoves(s,3);assert.equal(s.legalMoves.length,0);s.pendingDice=2;s.legalMoves=getLegalMoves(s,2);assert.equal(s.legalMoves[0].type,"finish");});
 test("three consecutive sixes forfeit the turn",()=>{let s=createGame();s=rollDice(s,6);s=moveToken(s,0);s=rollDice(s,6);s=moveToken(s,0);s=rollDice(s,6);assert.equal(s.turn,"blue");assert.equal(s.consecutiveSixes,0);assert.equal(s.lastAction.type,"three-sixes-forfeit");});
