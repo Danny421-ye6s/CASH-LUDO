@@ -336,11 +336,18 @@ async function playMove(token,diceValue){
   displayProgress=null;
   state=moveToken(state,token,diceValue);
   playSound(state.lastAction.captured.length?"capture":state.winner?"win":"move");
-  if(!state.winner)playSound("turn");
+  if(!state.winner&&state.turn!==before.turn)playSound("turn");
   const action=state.lastAction;
   const captureText=action.captured.length?" Captured an opponent token.":"";
   if(state.winner)say(state.winner.toUpperCase()+" wins!");
-  else say(before.turn.toUpperCase()+" moved "+diceValue+" spaces."+captureText+" "+state.turn.toUpperCase()+" plays next.");
+  else if(state.turn===before.turn&&state.pendingRolls.length){
+    const remainingText=state.pendingRolls.map(value=>"Move "+value).join(" and ");
+    const skippedText=action.skippedDice?.length?" Some dice had no legal move and were skipped.":"";
+    say("You used "+diceValue+"."+captureText+" You still have "+remainingText+". Choose another token to use it."+skippedText);
+  }else{
+    const skippedText=action.skippedDice?.length?" Some dice had no legal move and were skipped.":"";
+    say(before.turn.toUpperCase()+" used "+diceValue+"."+captureText+skippedText+" "+state.turn.toUpperCase()+" plays next.");
+  }
   render();
  }catch(error){displayProgress=null;render();say(error.message);}
  finally{isMoving=false;render();}
