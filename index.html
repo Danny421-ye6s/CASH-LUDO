@@ -155,7 +155,7 @@ button{border-radius:24px}
 .dock-player strong{font-size:13px;color:#fff}.dock-player small{font-size:10px;color:#d4f1ff}
 .player-dock .dice-area{margin:0 0 0 auto;gap:8px}
 .player-dock .dice{width:56px;height:56px;flex:0 0 56px}
-.player-dock .dice-caption{max-width:110px;font-size:10px}
+.player-dock .dice-caption{max-width:90px;font-size:10px}.roll-history{display:flex;gap:5px;align-items:center;margin-left:auto}.roll-chip{width:29px;height:29px;border-radius:7px;background:#fff;color:#16344c;border:2px solid #ffe17b;display:grid;place-items:center;font-size:14px;font-weight:950;box-shadow:0 2px 0 #8aa5b5}.roll-chip.used{opacity:.45;filter:grayscale(1)}.token-choice{position:absolute;z-index:20;left:50%;bottom:calc(100% + 5px);transform:translateX(-50%);display:flex;gap:4px;padding:5px;background:#063e68;border:2px solid #ffe17b;border-radius:9px;box-shadow:0 4px 12px #001c35aa;white-space:nowrap}.token-choice button{padding:6px 9px;border-radius:6px;background:#fff;color:#073b61;font-size:11px}.token-choice:after{content:"";position:absolute;top:100%;left:50%;border:6px solid transparent;border-top-color:#ffe17b;margin-left:-6px}
 @media(max-width:380px){.player-dock{padding:6px 8px;gap:7px}.dock-avatar{width:36px;height:36px}.player-dock .dice{width:50px;height:50px;flex-basis:50px}.player-dock .dice-caption{max-width:85px}}
 </style>
 </head>
@@ -167,7 +167,7 @@ button{border-radius:24px}
 <section class="panel">
 <div class="game-top" id="playersBar"></div>
 <div class="board-wrap"><div class="board" id="board" aria-label="Ludo board"></div></div>
-<div class="legend"><span>✦ Safe square</span><span>Exact roll to finish</span></div><div class="player-dock"><div class="dock-avatar" id="dockAvatar">R</div><div class="dock-player"><strong id="dockName">Red</strong><small id="dockHint">Your turn</small></div><div class="dice-area" id="diceArea"><button type="button" class="dice" id="dice" aria-label="Tap to roll dice">—</button><div class="dice-caption" id="diceCaption">Red: tap the dice to roll.</div></div></div>
+<div class="legend"><span>✦ Safe square</span><span>Exact roll to finish</span></div><div class="player-dock"><div class="dock-avatar" id="dockAvatar">R</div><div class="dock-player"><strong id="dockName">Red</strong><small id="dockHint">Your turn</small></div><div class="roll-history" id="rollHistory" aria-label="Your dice rolls"></div><div class="dice-area" id="diceArea"><button type="button" class="dice" id="dice" aria-label="Tap to roll dice">—</button><div class="dice-caption" id="diceCaption">Red: tap the dice to roll.</div></div></div>
 </section>
 <aside class="panel side">
 <h2 class="section-title" id="turnTitle">Red player's turn</h2><label for="playerCount" style="display:block;color:var(--muted);font-size:12px;margin:8px 0 5px">Players in this game</label><select id="playerCount" class="secondary" style="width:100%;padding:11px"><option value="2">2 players — Red vs Blue</option><option value="4">4 players — Red, Green, Blue, Yellow</option></select>
@@ -251,10 +251,14 @@ function tone(frequency,duration=0.11,type="sine",volume=0.045){
 function playSound(kind){
  if(kind==="roll"){tone(360,.08,"triangle");setTimeout(()=>tone(520,.1,"triangle"),85);}
  if(kind==="move")tone(620,.09,"sine");
+ if(kind==="select")tone(760,.055,"triangle",.035);
+ if(kind==="step")tone(430,.045,"square",.018);
  if(kind==="capture"){tone(210,.12,"sawtooth");setTimeout(()=>tone(150,.16,"sawtooth"),100);}
  if(kind==="win"){[523,659,784,1046].forEach((n,i)=>setTimeout(()=>tone(n,.22,"triangle"),i*120));}
 }
 let lastDice=null;
+let displayProgress=null;
+let choosingToken=null;
 function coordsFor(color,progress,token){
  if(progress===-1)return baseSpots[color][token];
  if(progress===58)return [7,7];
@@ -267,34 +271,56 @@ function addToken(color,token,progress){
  let stack=el.querySelector(".token-stack");
  if(!stack){stack=document.createElement("div");stack.className="token-stack";el.append(stack);}
  const piece=document.createElement("button");piece.type="button";piece.className="token "+color;piece.setAttribute("aria-label",color+" token");piece.title=color+" token";
- if(color===state.turn&&state.pendingDice!==null&&state.legalMoves.some(m=>m.token===token)){piece.classList.add("selectable");piece.addEventListener("click",()=>playMove(token));}
+ if(color===state.turn&&state.pendingRolls?.length&&state.legalMoves.some(m=>m.token===token)){piece.classList.add("selectable");piece.addEventListener("click",()=>showTokenChoice(piece,token));}
  stack.append(piece);
 }
 function render(){
  document.querySelectorAll(".token-stack").forEach(el=>el.remove());
- for(const color of state.playerOrder)getPlayerTokenStatus(state,color).forEach(t=>addToken(color,t.token,t.progress));
+ for(const color of state.playerOrder)getPlayerTokenStatus(state,color).forEach(t=>addToken(color,t.token,displayProgress&&color===state.turn&&displayProgress.token===t.token?displayProgress.progress:t.progress));
  $("playersBar").innerHTML=state.playerOrder.map(color=>'<div class="player"><span class="dot '+color+'-dot"></span>'+color.toUpperCase()+' <span class="turn-label">'+(state.turn===color&&!state.winner?"● PLAYING":"")+'</span></div>').join("");
  $("turnTitle").textContent=state.winner?state.winner.toUpperCase()+" WINS!":state.turn[0].toUpperCase()+state.turn.slice(1)+" player's turn";
  $("dockName").textContent=state.winner?state.winner.toUpperCase()+" WINS":state.turn[0].toUpperCase()+state.turn.slice(1);
  $("dockAvatar").textContent=state.turn[0].toUpperCase();
- $("dockHint").textContent=state.winner?"Game complete":state.pendingDice!==null?"Choose a token":state.awaitingBonusRoll?"Bonus roll ready":"Tap dice to play";
- $("dice").disabled=isRolling||state.pendingDice!==null||state.status!=="active";
- $("diceCaption").textContent=state.winner?"Game finished":state.pendingDice!==null?"Tap one of your glowing tokens":state.awaitingBonusRoll?"Six! Tap the dice for your bonus roll":state.turn[0].toUpperCase()+state.turn.slice(1)+": tap the dice to roll";
+ $("dockHint").textContent=state.winner?"Game complete":state.pendingRolls?.length?"Choose a token":"Tap dice to play";
+ $("rollHistory").innerHTML=(state.pendingRolls||[]).map((v,i)=>`<span class="roll-chip" title="Roll ${i+1}">${v}</span>`).join("");
+ $("dice").disabled=isRolling||!!state.pendingRolls?.length||state.status!=="active";
+ $("diceCaption").textContent=state.winner?"Game finished":state.pendingRolls?.length?"Tap a token, then choose a roll":state.turn[0].toUpperCase()+state.turn.slice(1)+": tap the dice";
  $("moves").innerHTML="";
 }
 function say(message){$("status").textContent=message;}
-function playMove(token){
+function showTokenChoice(piece,token){
+ document.querySelectorAll(".token-choice").forEach(x=>x.remove());
+ playSound("select");
+ const choices=document.createElement("div");choices.className="token-choice";
+ const values=[...new Set(state.legalMoves.filter(m=>m.token===token).map(m=>m.dice))];
+ values.forEach(value=>{const button=document.createElement("button");button.textContent="Move "+value;button.onclick=(event)=>{event.stopPropagation();choices.remove();playMove(token,value);};choices.append(button);});
+ piece.parentElement.style.position="relative";piece.parentElement.append(choices);
+}
+function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
+async function playMove(token,diceValue){
  try{
-  const before=state;state=moveToken(state,token);
+  const before=state;
+  const move=state.legalMoves.find(m=>m.token===token&&m.dice===diceValue);
+  if(!move)throw new Error("That move is not available");
+  let p=move.from;
+  if(move.type==="enter"||move.type==="enter-and-move"){
+    displayProgress={token,progress:move.to};playSound("step");render();await wait(180);
+  }else{
+    while(p<move.to){
+      p++;displayProgress={token,progress:p};playSound("step");render();await wait(145);
+    }
+  }
+  displayProgress=null;
+  state=moveToken(state,token,diceValue);
   playSound(state.lastAction.captured.length?"capture":state.winner?"win":"move");
   const action=state.lastAction;
-  const captureText=action.captured.length?" Captured "+action.captured.map(x=>x.color.toUpperCase()+" token "+(x.token+1)).join(", ")+".":"";
-  if(state.winner)say(state.winner.toUpperCase()+" has brought all four tokens home and wins!");
-  else say(before.turn.toUpperCase()+" moved a token."+captureText+" "+state.turn.toUpperCase()+" plays next.");
-  $("diceCaption").textContent="Choose a highlighted token move.";
+  const captureText=action.captured.length?" Captured an opponent token.":"";
+  if(state.winner)say(state.winner.toUpperCase()+" wins!");
+  else say(before.turn.toUpperCase()+" moved "+diceValue+" spaces."+captureText+" "+state.turn.toUpperCase()+" plays next.");
   render();
- }catch(error){say(error.message);}
+ }catch(error){displayProgress=null;render();say(error.message);}
 }
+
 const pipPositions={1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
 function setDiceFace(value){
  const diceEl=$("dice");diceEl.innerHTML="";
@@ -303,7 +329,7 @@ function setDiceFace(value){
  });
 }
 $("dice").onclick=()=>{
- if(isRolling||state.pendingDice!==null||state.status!=="active")return;
+ if(isRolling||state.pendingRolls?.length||state.status!=="active")return;
  isRolling=true;$("dice").disabled=true;
  $("dice").classList.remove("rolling");void $("dice").offsetWidth;$("dice").classList.add("rolling");
  playSound("roll");
@@ -315,16 +341,16 @@ $("dice").onclick=()=>{
   try{
    state=rollDice(state,dice);setDiceFace(dice);
    if(state.lastAction.type==="three-sixes-forfeit")say("Three sixes! "+state.lastAction.player.toUpperCase()+" loses the turn.");
-   else if(state.lastAction.type==="bonus-roll")say("Six! Roll again before moving a token.");
+   else if(state.lastAction.type==="bonus-roll")say("Six! Roll again. Your six is saved for your move choice.");
    else if(state.lastAction.type==="no-legal-move")say(state.lastAction.player.toUpperCase()+" rolled "+dice+" but has no legal move. "+state.turn.toUpperCase()+" plays next.");
-   else say(state.turn.toUpperCase()+" rolled "+dice+". Tap one of your glowing tokens on the board.");
-   $("diceCaption").textContent=state.lastAction.type==="bonus-roll"?"Six! Tap again for bonus roll":state.lastAction.type==="roll"?"Tap a glowing token to move":"Tap the dice to roll";
+   else say(state.turn.toUpperCase()+" rolled "+dice+". Tap a token and choose which dice value to use.");
+   $("diceCaption").textContent=state.lastAction.type==="bonus-roll"?"Roll again":state.lastAction.type==="roll"?"Choose a token":"Tap the dice to roll";
   }catch(error){say(error.message);}
   isRolling=false;$("dice").classList.remove("rolling");render();
  },900);
 };
 $("soundBtn").onclick=()=>{soundOn=!soundOn;$("soundBtn").textContent="Sound: "+(soundOn?"On":"Off");if(soundOn)tone(660,.1);};
-$("newBtn").onclick=()=>{state=createGame({playerCount:Number($("playerCount").value)});lastDice=null;$("dice").textContent="—";$("diceCaption").textContent="Red: tap the dice to roll.";say("New "+state.playerCount+"-player game started. Red plays first.");render();};
+$("newBtn").onclick=()=>{state=createGame({playerCount:Number($("playerCount").value)});lastDice=null;displayProgress=null;$("dice").textContent="—";$("diceCaption").textContent="Red: tap the dice to roll.";say("New "+state.playerCount+"-player game started. Red plays first.");render();};
 render();
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}</script>
