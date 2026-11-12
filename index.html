@@ -192,16 +192,17 @@ const loop=[
  [13,6],[12,6],[11,6],[10,6],[9,6],[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],[7,0],[6,0]
 ];
 const track=loop;
+// Home lanes point inward from the four player yards, like the reference board.
 const lanes={
- red:Array.from({length:6},(_,i)=>[7,i+1]),
- green:Array.from({length:6},(_,i)=>[i+1,7]),
- blue:Array.from({length:6},(_,i)=>[7,13-i]),
+ red:Array.from({length:6},(_,i)=>[i+1,7]),
+ blue:Array.from({length:6},(_,i)=>[7,i+1]),
+ green:Array.from({length:6},(_,i)=>[7,13-i]),
  yellow:Array.from({length:6},(_,i)=>[13-i,7])
 };
 const baseSpots={
- red:[[2,2],[2,4],[4,2],[4,4]],
- green:[[2,10],[2,12],[4,10],[4,12]],
- blue:[[10,10],[10,12],[12,10],[12,12]],
+ blue:[[2,2],[2,4],[4,2],[4,4]],
+ red:[[2,10],[2,12],[4,10],[4,12]],
+ green:[[10,10],[10,12],[12,10],[12,12]],
  yellow:[[10,2],[10,4],[12,2],[12,4]]
 };
 const cellAt=new Map();
@@ -210,21 +211,21 @@ for(let r=0;r<15;r++)for(let c=0;c<15;c++){
 }
 for(let r=0;r<15;r++)for(let col=0;col<15;col++){
  const el=cellAt.get(r+","+col);
- if(r<6&&col<6)el.classList.add("zone-red");
- else if(r<6&&col>8)el.classList.add("zone-green");
+ if(r<6&&col<6)el.classList.add("zone-blue");
+ else if(r<6&&col>8)el.classList.add("zone-red");
  else if(r>8&&col<6)el.classList.add("zone-yellow");
- else if(r>8&&col>8)el.classList.add("zone-blue");
- if(r>=1&&r<=4&&col>=1&&col<=4)el.classList.add("yard-red-inner");
- if(r>=1&&r<=4&&col>=10&&col<=13)el.classList.add("yard-green-inner");
- if(r>=10&&r<=13&&col>=10&&col<=13)el.classList.add("yard-blue-inner");
+ else if(r>8&&col>8)el.classList.add("zone-green");
+ if(r>=1&&r<=4&&col>=1&&col<=4)el.classList.add("yard-blue-inner");
+ if(r>=1&&r<=4&&col>=10&&col<=13)el.classList.add("yard-red-inner");
+ if(r>=10&&r<=13&&col>=10&&col<=13)el.classList.add("yard-green-inner");
  if(r>=10&&r<=13&&col>=1&&col<=4)el.classList.add("yard-yellow-inner");
 }
 track.forEach((p,i)=>{
  const el=cellAt.get(p.join(","));el.classList.add("track");
  if(SAFE_SQUARES.includes(i))el.classList.add("safe");
- if(i===0)el.classList.add("start-red");
- if(i===13)el.classList.add("start-green");
- if(i===26)el.classList.add("start-blue");
+ if(i===0)el.classList.add("start-blue");
+ if(i===13)el.classList.add("start-red");
+ if(i===26)el.classList.add("start-green");
  if(i===39)el.classList.add("start-yellow");
 });
 for(const color of Object.keys(lanes))lanes[color].forEach(p=>cellAt.get(p.join(",")).classList.add(color+"-lane"));
