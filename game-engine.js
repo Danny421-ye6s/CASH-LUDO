@@ -29,7 +29,7 @@ export function createGame({ gameId = "local-game", players = {}, playerCount = 
   return {
     rulesVersion: RULES_VERSION, gameId, playerCount, playerOrder, status: "active",
     players: activePlayers, turn: playerOrder[0], consecutiveSixes: 0,
-    pendingDice: null, awaitingBonusRoll: false, bonusEntryAvailable: false, legalMoves: [], tokens, winner: null, version: 0, lastAction: null
+    pendingDice: null, pendingRolls: [], awaitingBonusRoll: false, bonusEntryAvailable: false, legalMoves: [], tokens, winner: null, version: 0, lastAction: null
   };
 }
 
@@ -77,44 +77,47 @@ function applyCapture(state, color, destination) {
 
 export function rollDice(state, dice) {
   if (state.status !== "active" || state.winner) throw new Error("Game is not active");
-  if (state.pendingDice !== null) throw new Error("Choose a token for the pending roll first");
+  if (state.pendingDice !== null) throw new Error("Choose a token first");
   if (!Number.isInteger(dice) || dice < 1 || dice > 6) throw new Error("Dice must be an integer from 1 to 6");
   const next = clone(state);
+  next.pendingRolls = [...(next.pendingRolls || []), dice];
   if (dice === 6) {
     next.consecutiveSixes += 1; next.bonusEntryAvailable = true;
     if (next.consecutiveSixes >= MAX_CONSECUTIVE_SIXES) {
-      next.consecutiveSixes = 0; next.awaitingBonusRoll = false; next.bonusEntryAvailable = false;
+      next.consecutiveSixes = 0; next.awaitingBonusRoll = false; next.bonusEntryAvailable = false; next.pendingRolls = [];
       next.turn = nextPlayer(next, state.turn); next.legalMoves = [];
       next.lastAction = { type: "three-sixes-forfeit", dice, player: state.turn };
     } else {
       next.awaitingBonusRoll = true; next.legalMoves = [];
       next.lastAction = { type: "bonus-roll", dice, player: state.turn, bonusRolls: next.consecutiveSixes };
     }
-    next.version++; return next;
+  } else {
+    next.consecutiveSixes = 0; next.awaitingBonusRoll = false;
+    next.legalMoves = next.pendingRolls.flatMap(value => getLegalMoves(next, value).map(move => ({...move, dice:value})));
+    if (next.legalMoves.length === 0) {
+      next.pendingRolls = []; next.bonusEntryAvailable = false; next.turn = nextPlayer(next, state.turn);
+      next.lastAction = { type: "no-legal-move", dice, player: state.turn };
+    } else next.lastAction = { type: "roll", dice, player: state.turn };
   }
-  next.consecutiveSixes = 0; next.awaitingBonusRoll = false;
-  next.pendingDice = dice; next.legalMoves = getLegalMoves(next, dice);
-  if (next.legalMoves.length === 0) {
-    next.pendingDice = null; next.bonusEntryAvailable = false; next.turn = nextPlayer(next, state.turn);
-    next.lastAction = { type: "no-legal-move", dice, player: state.turn };
-  } else next.lastAction = { type: "roll", dice, player: state.turn };
   next.version++; return next;
 }
 
-export function moveToken(state, tokenIndex) {
+export function moveToken(state, tokenIndex, diceValue) {
   if (state.status !== "active" || state.winner) throw new Error("Game is not active");
-  if (state.pendingDice === null) throw new Error("Roll the dice before moving");
+  if (!Array.isArray(state.pendingRolls) || !state.pendingRolls.length) throw new Error("Roll the dice before moving");
   if (!Number.isInteger(tokenIndex) || tokenIndex < 0 || tokenIndex >= TOKENS_PER_PLAYER) throw new Error("Token index must be between 0 and 3");
-  const move = state.legalMoves.find(candidate => candidate.token === tokenIndex);
-  if (!move) throw new Error("That token cannot make a legal move");
+  const selectedDice = diceValue ?? state.pendingRolls[0];
+  if (!state.pendingRolls.includes(selectedDice)) throw new Error("That dice value is not available");
+  const move = getLegalMoves(state, selectedDice).find(candidate => candidate.token === tokenIndex);
+  if (!move) throw new Error("That token cannot move by "+selectedDice);
   const next = clone(state), color = state.turn;
   next.tokens[color][tokenIndex] = move.to;
   const captured = (move.type === "move" || move.type === "enter-and-move") ? applyCapture(next, color, move.to) : [];
   const won = next.tokens[color].every(progress => progress === FINISH_PROGRESS);
-  next.pendingDice = null; next.awaitingBonusRoll = false; next.bonusEntryAvailable = false; next.legalMoves = [];
+  next.pendingRolls = []; next.pendingDice = null; next.awaitingBonusRoll = false; next.bonusEntryAvailable = false; next.legalMoves = [];
   if (won) { next.winner = color; next.status = "finished"; }
   else { next.turn = nextPlayer(next, color); next.consecutiveSixes = 0; }
-  next.lastAction = { type: move.type, player: color, token: tokenIndex, from: move.from, to: move.to, captured };
+  next.lastAction = { type: move.type, player: color, token: tokenIndex, dice:selectedDice, from: move.from, to: move.to, captured };
   next.version++; return next;
 }
 
