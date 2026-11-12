@@ -27,6 +27,12 @@ main{max-width:920px;margin:auto;padding:20px 14px 48px}.hero{text-align:center;
 .token.red{background:#ff7777}.token.blue{background:#73baff}
 .token-stack{position:absolute;inset:0;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:1px;z-index:2}
 .token-stack .token{width:46%;height:46%}
+.token.selectable{outline:3px solid var(--gold);animation:tokenGlow .85s ease-in-out infinite alternate;cursor:pointer}
+@keyframes tokenGlow{from{transform:scale(.92);box-shadow:0 0 0 1px #e9bd6255}to{transform:scale(1.12);box-shadow:0 0 12px 4px #e9bd62}}
+@keyframes diceShake{0%,100%{transform:rotate(0) scale(1)}20%{transform:rotate(-13deg) scale(1.08)}40%{transform:rotate(13deg) scale(1.08)}60%{transform:rotate(-8deg)}80%{transform:rotate(8deg)}}
+.dice.rolling{animation:diceShake .55s ease-in-out}
+.token.pop{animation:tokenPop .32s ease-out}
+@keyframes tokenPop{0%{transform:scale(.4)}75%{transform:scale(1.25)}100%{transform:scale(1)}}
 .dice-area{display:flex;align-items:center;justify-content:center;gap:15px;margin:15px 0 8px}.dice{width:64px;height:64px;background:#f4f0e7;color:#17263c;border-radius:14px;display:grid;place-items:center;font-size:42px;font-weight:950;box-shadow:0 5px 0 #b8a987}.dice-caption{color:var(--muted);font-size:12px;max-width:170px}
 button{font:inherit;border:0;border-radius:12px;padding:12px 14px;font-weight:850;cursor:pointer}
 button:disabled{opacity:.4;cursor:not-allowed}.primary{background:linear-gradient(135deg,#f0ce82,#c8933e);color:#172238}.secondary{background:#1b2d47;color:#eaf0f8;border:1px solid #39516f}
@@ -51,7 +57,7 @@ button:disabled{opacity:.4;cursor:not-allowed}.primary{background:linear-gradien
 <aside class="panel side">
 <h2 class="section-title" id="turnTitle">Red player's turn</h2>
 <div class="dice-area"><div class="dice" id="dice" aria-label="Dice">—</div><div class="dice-caption" id="diceCaption">Start a new game, then roll the dice.</div></div>
-<div class="controls"><button class="primary" id="rollBtn">Roll dice</button><button class="secondary" id="newBtn">New game</button></div>
+<div class="controls"><button class="primary" id="rollBtn">Roll dice</button><button class="secondary" id="newBtn">New game</button></div><button class="secondary" id="soundBtn" style="width:100%;margin-top:9px">Sound: On</button>
 <div class="moves" id="moves"></div>
 <div class="status" id="status" aria-live="polite">Red starts. Roll a six to bring a token out of base.</div>
 <p class="note">Rules in this local build: four tokens per player, six to leave base, safe squares, captures, extra roll on six, and an exact roll to finish. Three consecutive sixes forfeit the turn. Online rooms are not connected yet.</p>
@@ -81,6 +87,27 @@ baseSpots.red.forEach(p=>cellAt.get(p.join(",")).classList.add("base-red"));
 baseSpots.blue.forEach(p=>cellAt.get(p.join(",")).classList.add("base-blue"));
 cellAt.get("7,7").classList.add("center");
 let state=createGame();
+let soundOn=true;
+let audioContext=null;
+function tone(frequency,duration=0.11,type="sine",volume=0.045){
+ if(!soundOn)return;
+ try{
+  audioContext=audioContext||new (window.AudioContext||window.webkitAudioContext)();
+  if(audioContext.state==="suspended")audioContext.resume();
+  const oscillator=audioContext.createOscillator(),gain=audioContext.createGain();
+  oscillator.type=type;oscillator.frequency.setValueAtTime(frequency,audioContext.currentTime);
+  gain.gain.setValueAtTime(volume,audioContext.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001,audioContext.currentTime+duration);
+  oscillator.connect(gain);gain.connect(audioContext.destination);
+  oscillator.start();oscillator.stop(audioContext.currentTime+duration);
+ }catch(_){}
+}
+function playSound(kind){
+ if(kind==="roll"){tone(360,.08,"triangle");setTimeout(()=>tone(520,.1,"triangle"),85);}
+ if(kind==="move")tone(620,.09,"sine");
+ if(kind==="capture"){tone(210,.12,"sawtooth");setTimeout(()=>tone(150,.16,"sawtooth"),100);}
+ if(kind==="win"){[523,659,784,1046].forEach((n,i)=>setTimeout(()=>tone(n,.22,"triangle"),i*120));}
+}
 let lastDice=null;
 function coordsFor(color,progress,token){
  if(progress===-1)return baseSpots[color][token];
@@ -93,7 +120,9 @@ function addToken(color,token,progress){
  const el=cellAt.get(r+","+c);
  let stack=el.querySelector(".token-stack");
  if(!stack){stack=document.createElement("div");stack.className="token-stack";el.append(stack);}
- const piece=document.createElement("span");piece.className="token "+color;piece.textContent=String(token+1);piece.title=color+" token "+(token+1);stack.append(piece);
+ const piece=document.createElement("span");piece.className="token "+color;piece.textContent=String(token+1);piece.title=color+" token "+(token+1);
+ if(state.pendingDice!==null&&state.legalMoves.some(m=>m.token===token))piece.classList.add("selectable");
+ stack.append(piece);
 }
 function render(){
  document.querySelectorAll(".token-stack").forEach(el=>el.remove());
@@ -115,6 +144,7 @@ function say(message){$("status").textContent=message;}
 function playMove(token){
  try{
   const before=state;state=moveToken(state,token);
+  playSound(state.lastAction.captured.length?"capture":state.winner?"win":"move");
   const action=state.lastAction;
   const captureText=action.captured.length?" Captured "+action.captured.length+" blue/red token(s).":"";
   if(state.winner)say(state.winner.toUpperCase()+" has brought all four tokens home and wins!");
@@ -126,6 +156,8 @@ function playMove(token){
 }
 $("rollBtn").onclick=()=>{
  try{
+  $("dice").classList.remove("rolling");void $("dice").offsetWidth;$("dice").classList.add("rolling");
+  playSound("roll");
   const dice=1+Math.floor(Math.random()*6);lastDice=dice;state=rollDice(state,dice);
   $("dice").textContent=String(dice);
   if(state.lastAction.type==="three-sixes-forfeit")say("Three consecutive sixes! "+state.lastAction.player.toUpperCase()+" loses this turn.");
@@ -135,6 +167,7 @@ $("rollBtn").onclick=()=>{
   render();
  }catch(error){say(error.message);}
 };
+$("soundBtn").onclick=()=>{soundOn=!soundOn;$("soundBtn").textContent="Sound: "+(soundOn?"On":"Off");if(soundOn)tone(660,.1);};
 $("newBtn").onclick=()=>{state=createGame();lastDice=null;$("dice").textContent="—";$("diceCaption").textContent="Red starts. Roll a six to bring a token out of base.";say("New game started. Red plays first.");render();};
 render();
 </script>
