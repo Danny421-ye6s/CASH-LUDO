@@ -7,8 +7,9 @@
 - [x] Pure JavaScript game engine for two/four players, with versioned commands, turn order, legal-move checks, and multi-opponent captures.
 - [x] Automated Node test suite expanded to cover two/four-player turn order and captures (20 tests; latest run still needs confirmation).
 - [x] Local Node validation: 15 game-engine tests passed.
-- [x] Local board UI connected to the game engine, with a 2/4-player selector and four token colours (board geometry still needs a proper Ludo redesign; no online play yet).
+- [x] Local board UI connected to the game engine, with a 2/4-player selector and four token colours (board now uses a 15×15 cross-shaped track with four corner yards and coloured home lanes; Android visual review remains; no online play yet).
 - [ ] Run the test suite in GitHub Actions and resolve any failures.
+- [x] Replace the perimeter placeholder with a 15×15 cross-shaped Ludo board, four corner yards, four home lanes, and a central finish.
 - [ ] Review board layout and rule variants on real Android screen sizes.
 - [ ] Add secure server-authoritative room creation/join and game commands.
 - [ ] Configure Firebase Authentication, Realtime Database, and security rules.
