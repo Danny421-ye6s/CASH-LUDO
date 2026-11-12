@@ -1,14 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {createGame,rollDice,moveToken,getLegalMoves,globalSquare,FINISH_PROGRESS,SAFE_SQUARES,applyPlayerCommand} from "./game-engine.js";
-const enterRed=()=>moveToken(rollDice(rollDice(createGame(),6),5),0);
+
 
 test("starts with four tokens in each active player's base",()=>{const s=createGame();assert.deepEqual(s.tokens.red,[-1,-1,-1,-1]);assert.deepEqual(s.tokens.blue,[-1,-1,-1,-1]);assert.equal(s.playerCount,2);});
 test("supports exactly two or four players",()=>{assert.deepEqual(createGame({playerCount:2}).playerOrder,["red","blue"]);assert.deepEqual(createGame({playerCount:4}).playerOrder,["red","green","blue","yellow"]);assert.throws(()=>createGame({playerCount:3}));});
 test("four-player games create four sets of four tokens",()=>{const s=createGame({playerCount:4});assert.equal(Object.keys(s.tokens).length,4);for(const c of s.playerOrder)assert.equal(s.tokens[c].length,4);});
 test("six followed by a movement roll allows a token to leave base",()=>{let s=rollDice(createGame(),6);s=rollDice(s,5);assert.equal(getLegalMoves(s,5)[0].type,"enter-and-move");});
 test("six gives a bonus roll before any movement",()=>{const s=rollDice(createGame(),6);assert.equal(s.awaitingBonusRoll,true);assert.equal(s.tokens.red[0],-1);});
-test("a non-six movement roll moves token and passes turn",()=>{let s=rollDice(createGame(),6);s=rollDice(s,6);s=moveToken(s,0);assert.equal(s.tokens.red[0],4);assert.equal(s.turn,"blue");});
+test("a non-six movement roll moves token and passes turn",()=>{let s=rollDice(createGame(),6);s=rollDice(s,5);s=moveToken(s,0);assert.equal(s.tokens.red[0],4);assert.equal(s.turn,"blue");});
 test("four-player turn order advances clockwise",()=>{let s=createGame({playerCount:4});s=rollDice(s,2);assert.equal(s.turn,"green");});
 test("four-player turn order continues after green",()=>{let s=createGame({playerCount:4});s.tokens.red[0]=0;s.pendingDice=1;s.legalMoves=[{token:0,type:"move",from:0,to:1}];s=moveToken(s,0);assert.equal(s.turn,"green");});
 test("requires an exact roll to finish",()=>{let s=createGame();s.tokens.red[0]=FINISH_PROGRESS-2;s.pendingDice=3;s.legalMoves=getLegalMoves(s,3);assert.equal(s.legalMoves.length,0);s.pendingDice=2;s.legalMoves=getLegalMoves(s,2);assert.equal(s.legalMoves[0].type,"finish");});
