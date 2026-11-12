@@ -281,7 +281,7 @@ function render(){
  $("turnTitle").textContent=state.winner?state.winner.toUpperCase()+" WINS!":state.turn[0].toUpperCase()+state.turn.slice(1)+" player's turn";
  $("dockName").textContent=state.winner?state.winner.toUpperCase()+" WINS":state.turn[0].toUpperCase()+state.turn.slice(1);
  $("dockAvatar").textContent=state.turn[0].toUpperCase();
- $("dockHint").textContent=state.winner?"Game complete":state.pendingRolls?.length?"Choose a token":"Tap dice to play";
+ $("dockHint").textContent=state.winner?"Game complete":state.awaitingBonusRoll?"Six! Roll again":state.pendingRolls?.length?"Choose a token":"Tap dice to play";
  $("rollHistory").innerHTML=(state.pendingRolls||[]).map((v,i)=>`<span class="roll-chip" title="Roll ${i+1}">${v}</span>`).join("");
  $("dice").disabled=isRolling||(!state.awaitingBonusRoll&&!!state.pendingRolls?.length)||state.status!=="active";
  $("diceCaption").textContent=state.winner?"Game finished":state.awaitingBonusRoll?"Six! Tap dice to roll again":state.pendingRolls?.length?"Tap a token, then choose a roll":state.turn[0].toUpperCase()+state.turn.slice(1)+": tap the dice";
@@ -349,9 +349,9 @@ $("dice").onclick=()=>{
   try{
    state=rollDice(state,dice);setDiceFace(dice);
    if(state.lastAction.type==="three-sixes-forfeit")say("Three sixes! "+state.lastAction.player.toUpperCase()+" loses the turn.");
-   else if(state.lastAction.type==="bonus-roll")say("Six! Roll again. Your six is saved for your move choice.");
+   else if(state.lastAction.type==="bonus-roll")say("You rolled a SIX! Your six is saved. Tap the dice again to roll your bonus number.");
    else if(state.lastAction.type==="no-legal-move")say(state.lastAction.player.toUpperCase()+" rolled "+dice+" but has no legal move. "+state.turn.toUpperCase()+" plays next.");
-   else say(state.turn.toUpperCase()+" rolled "+dice+". Tap a token and choose which dice value to use.");
+   else {const choices=[...new Set(state.legalMoves.map(move=>move.dice))];say("You rolled "+dice+". Tap a glowing token, then choose "+choices.map(value=>"Move "+value).join(" or ")+".");}
    $("diceCaption").textContent=state.lastAction.type==="bonus-roll"?"Roll again":state.lastAction.type==="roll"?"Choose a token":"Tap the dice to roll";
   }catch(error){say(error.message);}
   isRolling=false;$("dice").classList.remove("rolling");render();
@@ -361,6 +361,6 @@ $("soundBtn").onclick=()=>{soundOn=!soundOn;$("soundBtn").textContent="Sound: "+
 $("newBtn").onclick=()=>{state=createGame({playerCount:Number($("playerCount").value)});lastDice=null;displayProgress=null;$("dice").textContent="—";$("diceCaption").textContent="Red: tap the dice to roll.";say("New "+state.playerCount+"-player game started. Red plays first.");render();};
 render();
 </script>
-<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}))}</script>
 </body>
 </html>
