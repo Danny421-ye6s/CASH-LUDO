@@ -67,9 +67,9 @@ for(let c=1;c<=13;c++) track.push([0,c]);
 for(let r=1;r<=13;r++) track.push([r,14]);
 for(let c=13;c>=1;c--) track.push([14,c]);
 for(let r=13;r>=1;r--) track.push([r,0]);
-const redLane=Array.from({length:6},(_,i)=>[i+1,7]);
-const blueLane=Array.from({length:6},(_,i)=>[13-i,7]);
-const baseSpots={red:[[2,2],[2,4],[4,2],[4,4]],blue:[[10,10],[10,12],[12,10],[12,12]]};
+const redLane=Array.from({length:6},(_,i)=>[i+1,i+1]);
+const blueLane=Array.from({length:6},(_,i)=>[13-i,13-i]);
+const baseSpots={red:[[2,3],[3,2],[3,4],[4,3]],blue:[[10,11],[11,10],[11,12],[12,11]]};
 const cellAt=new Map();
 for(let r=0;r<15;r++)for(let c=0;c<15;c++){
  const el=document.createElement("div");el.className="cell";el.style.gridRow=String(r+1);el.style.gridColumn=String(c+1);board.append(el);cellAt.set(r+","+c,el);
