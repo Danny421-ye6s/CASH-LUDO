@@ -6,7 +6,7 @@ export const HOME_LANE_LENGTH = 6;
 export const FINISH_PROGRESS = TRACK_LENGTH + HOME_LANE_LENGTH;
 export const TOKENS_PER_PLAYER = 4;
 export const COLORS = Object.freeze(["red", "blue", "green", "yellow"]);
-export const START_OFFSETS = Object.freeze({ red: 0, blue: 26, green: 13, yellow: 39 });
+export const START_OFFSETS = Object.freeze({ red: 13, blue: 0, green: 26, yellow: 39 });
 export const SAFE_SQUARES = Object.freeze([0, 8, 13, 21, 26, 34, 39, 47]);
 export const MAX_CONSECUTIVE_SIXES = 3;
 
