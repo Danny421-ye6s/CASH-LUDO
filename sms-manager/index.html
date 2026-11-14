@@ -4,64 +4,81 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#102a43">
-<title>SMS Manager</title>
+<title>MOB WALLET SMS</title>
 <style>
-:root{--navy:#102a43;--blue:#1769aa;--bg:#f3f6fa;--ink:#172b4d;--muted:#62748a;--line:#e2e8f0}
+:root{--navy:#102a43;--blue:#1769aa;--bg:#f2f5f9;--ink:#172b4d;--muted:#62748a;--line:#dce4ee;--green:#147d55}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font:16px system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}
-header{background:var(--navy);color:white;padding:22px 18px 26px;border-radius:0 0 22px 22px}
-header h1{margin:0;font-size:24px}header p{margin:5px 0 0;color:#c9d8e8;font-size:13px}
-main{max-width:680px;margin:18px auto;padding:0 14px 36px}
-.card{background:white;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 4px 16px #102a4309}
-h2{font-size:17px;margin:0 0 14px}
-label{display:block;font-size:13px;font-weight:650;margin:12px 0 6px}
-input,textarea{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;background:white;color:var(--ink)}
-textarea{min-height:120px;resize:vertical}
-button{border:0;border-radius:11px;padding:14px 16px;font:700 15px system-ui;cursor:pointer}
-.primary{width:100%;background:var(--blue);color:white;margin-top:14px}
-.secondary{background:#eaf2fb;color:var(--blue)}
-.note{font-size:12px;color:var(--muted);line-height:1.5}
+header{background:linear-gradient(135deg,#102a43,#1769aa);color:white;padding:25px 18px 30px;border-radius:0 0 24px 24px}
+header h1{margin:0;font-size:25px;letter-spacing:.2px}header p{margin:6px 0 0;color:#d5e5f4;font-size:13px}
+main{max-width:700px;margin:20px auto;padding:0 14px 40px}.card{background:white;border:1px solid var(--line);border-radius:17px;padding:18px;margin-bottom:15px;box-shadow:0 5px 18px #102a430a}
+h2{font-size:18px;margin:0 0 14px}.brand{font-weight:800;letter-spacing:1px;color:#1769aa}
+label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}
+input,textarea{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:11px;font:inherit;background:white;color:var(--ink)}
+textarea{min-height:125px;resize:vertical}button{border:0;border-radius:11px;padding:13px 16px;font:700 14px system-ui;cursor:pointer}
+.primary{width:100%;background:var(--blue);color:white;margin-top:15px}.secondary{background:#eaf2fb;color:var(--blue)}
+.note{font-size:12px;color:var(--muted);line-height:1.55}.smallcaps{font-size:11px;font-weight:800;letter-spacing:.8px;color:var(--muted)}
+.notice{display:none;margin-top:12px;padding:12px;border-radius:10px;background:#fff4d6;color:#704d00;font-size:13px;line-height:1.45}
+.pill{font-size:11px;border-radius:99px;padding:5px 9px;background:#fff4d6;color:#805600;font-weight:800}
 .row{display:flex;justify-content:space-between;gap:12px;align-items:center}
-.pill{font-size:11px;border-radius:99px;padding:5px 9px;background:#fff4d6;color:#805600;font-weight:700}
+#dashboard{display:none}.stat{background:#f3f7fb;border-radius:12px;padding:13px;flex:1}.stat strong{display:block;font-size:20px}.stat span{font-size:11px;color:var(--muted)}
+.item{padding:12px 0;border-top:1px solid var(--line)}.item:first-child{border-top:0}.item strong{font-size:14px}.item p{font-size:13px;margin:5px 0;color:var(--muted);overflow-wrap:anywhere}
 .empty{padding:18px;text-align:center;color:var(--muted);font-size:13px}
-.item{padding:12px 0;border-top:1px solid var(--line)}
-.item:first-child{border-top:0}.item strong{font-size:14px}.item p{font-size:13px;margin:5px 0;color:var(--muted);overflow-wrap:anywhere}
-#notice{display:none;margin-top:12px;padding:11px;border-radius:10px;background:#fff4d6;color:#704d00;font-size:13px}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+@media(min-width:560px){.stats{display:flex;gap:10px}}
 </style>
 </head>
 <body>
-<header><h1>SMS Manager</h1><p>Compose and organise SMS messages from your phone</p></header>
+<header><h1>MOB WALLET SMS</h1><p>Personal SMS dashboard · Uganda</p></header>
 <main>
+<section class="card" id="login">
+<div class="topline"><div><div class="smallcaps">PRIVATE ACCESS</div><h2 style="margin:5px 0 0">Sign in</h2></div><span class="pill">PREVIEW BUILD</span></div>
+<p class="note">This is the first interface preview. Secure account sign-in is not active yet; it must be connected to a server-side authentication service before you use a real password.</p>
+<label for="email">Email or username</label><input id="email" autocomplete="username" placeholder="Enter your username">
+<label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Enter your password">
+<button class="primary" id="signin" type="button">Sign in</button>
+<div class="notice" id="loginNotice" role="status"></div>
+<button class="secondary" id="preview" type="button" style="width:100%;margin-top:10px">Preview dashboard (no login)</button>
+<p class="note" style="margin-top:12px">Do not enter a real password in this preview.</p>
+</section>
+
+<section id="dashboard">
 <section class="card">
-<div class="row"><h2>Compose message</h2><span class="pill">DEMO MODE</span></div>
-<label for="number">Recipient phone number</label><input id="number" type="tel" inputmode="tel" placeholder="+256 7XX XXX XXX" autocomplete="tel">
-<label for="sender">Approved sender ID</label><input id="sender" type="text" placeholder="Enter your approved sender ID" maxlength="11">
-<p class="note">Use only a sender ID registered to you or authorised for your organisation. Do not use MTN or MTN Mobile Money without written authorisation.</p>
-<label for="message">Message</label><textarea id="message" maxlength="1000" placeholder="Type your message..."></textarea>
-<div class="row"><span class="note">Keep messages clear and lawful.</span><span class="note" id="count">0 / 1000</span></div>
-<button class="primary" id="send">Prepare SMS</button><div id="notice" role="status"></div>
+<div class="topline"><div><div class="smallcaps">MESSAGE CENTRE</div><h2 style="margin:5px 0 0">Compose SMS</h2></div><span class="pill">DEMO ONLY</span></div>
+<div class="row stats" style="margin:15px 0">
+<div class="stat"><strong class="brand">MOBWALLET</strong><span>Requested sender ID</span></div>
+<div class="stat"><strong>1</strong><span>Recipient per message</span></div>
+</div>
+<label for="number">Recipient phone number</label><input id="number" type="tel" inputmode="tel" autocomplete="tel" placeholder="+256 7XX XXX XXX">
+<label for="message">Your message</label><textarea id="message" maxlength="1000" placeholder="Write your message..."></textarea>
+<div class="row"><span class="note">Use messages only for recipients who have agreed to receive them.</span><span class="note" id="count">0 / 1000</span></div>
+<button class="primary" id="send" type="button">Prepare message</button><div class="notice" id="sendNotice" role="status"></div>
 </section>
 <section class="card"><div class="row"><h2>Message history</h2><button class="secondary" id="clear" type="button">Clear</button></div><div id="history" class="empty">No messages prepared yet.</div></section>
-<section class="card"><h2>Connect an SMS provider</h2><p class="note">This first version is a working interface only. It does not send SMS yet. To enable real delivery, create an account with an authorised SMS gateway, complete sender-ID approval for Uganda, and connect its API through a secure backend. Never put provider API keys in this page.</p></section>
+<section class="card"><h2>Before real SMS sending</h2><p class="note">This preview does not send SMS. To activate delivery, we must connect a legitimate SMS gateway through a secure backend, add its API credentials privately on the server, and obtain approval for MOBWALLET as your sender ID. Recipients will see MOBWALLET only if the provider and destination network accept and approve it. This app is not an official MTN, bank, or mobile-money notification service.</p></section>
+<div style="text-align:right;margin:0 2px 14px"><button class="secondary" id="logout" type="button">Exit preview</button></div>
+</section>
 </main>
 <script>
-const $=id=>document.getElementById(id),message=$('message');
-message.addEventListener('input',()=>$('count').textContent=message.value.length+' / 1000');
-function show(t){$('notice').style.display='block';$('notice').textContent=t}
+const $=id=>document.getElementById(id);
+function notice(id,text){const n=$(id);n.style.display='block';n.textContent=text}
+$('signin').addEventListener('click',()=>notice('loginNotice','Secure sign-in is not connected yet. The backend and password authentication must be set up before real accounts can be used.'));
+$('preview').addEventListener('click',()=>{$('login').style.display='none';$('dashboard').style.display='block'});
+$('logout').addEventListener('click',()=>{$('dashboard').style.display='none';$('login').style.display='block'});
+$('message').addEventListener('input',()=> $('count').textContent=$('message').value.length+' / 1000');
 $('send').addEventListener('click',()=>{
-const number=$('number').value.trim(),sender=$('sender').value.trim(),body=message.value.trim();
-if(!/^\\+?[0-9 ]{9,16}$/.test(number)){show('Enter a valid recipient phone number, including +256 where appropriate.');return}
-if(!sender){show('Enter a sender ID that has been approved for your account.');return}
-if(!body){show('Type a message before continuing.');return}
-if(/mtn|mobile\\s*money/i.test(sender)){show('This demo cannot use MTN branding. Use only an MTN sender ID if MTN has explicitly authorised it for you.');return}
-const entry=document.createElement('div');entry.className='item';
-const strong=document.createElement('strong');strong.textContent='To: '+number+' · Sender: '+sender;
-const p=document.createElement('p');p.textContent=body;
-const status=document.createElement('span');status.className='note';status.textContent='Prepared locally — not sent';
-entry.append(strong,p,status);const history=$('history');
-if(history.classList.contains('empty')){history.className='';history.textContent=''}
-history.prepend(entry);show('Message prepared. It has NOT been sent. Connect an approved SMS provider to enable delivery.');
-message.value='';$('count').textContent='0 / 1000';
+ const number=$('number').value.trim(),body=$('message').value.trim();
+ if(!/^\+?[0-9 ]{9,16}$/.test(number)){notice('sendNotice','Enter a valid phone number, for example +2567XXXXXXXX.');return}
+ if(!body){notice('sendNotice','Write a message first.');return}
+ const history=$('history');if(history.classList.contains('empty')){history.className='';history.textContent=''}
+ const item=document.createElement('div');item.className='item';
+ const title=document.createElement('strong');title.textContent='To: '+number+' · Sender requested: MOBWALLET';
+ const content=document.createElement('p');content.textContent=body;
+ const status=document.createElement('span');status.className='note';status.textContent='Prepared locally — NOT SENT';
+ item.append(title,content,status);history.prepend(item);
+ notice('sendNotice','Message saved in this page preview only. It has NOT been sent.');
+ $('message').value='';$('count').textContent='0 / 1000';
 });
 $('clear').addEventListener('click',()=>{$('history').className='empty';$('history').textContent='No messages prepared yet.'});
 </script>
-</body></html>
+</body>
+</html>
