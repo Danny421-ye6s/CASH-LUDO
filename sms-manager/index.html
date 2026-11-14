@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102a43">
 <title>MOB WALLET SMS</title>
 <style>
-:root{--navy:#102a43;--blue:#1769aa;--bg:#f2f5f9;--ink:#172b4d;--muted:#62748a;--line:#dce4ee;--green:#147d55}
+:root{--navy:#102a43;--blue:#1769aa;--bg:#f2f5f9;--ink:#172b4d;--muted:#62748a;--line:#dce4ee}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font:16px system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}
 header{background:linear-gradient(135deg,#102a43,#1769aa);color:white;padding:25px 18px 30px;border-radius:0 0 24px 24px}
 header h1{margin:0;font-size:25px;letter-spacing:.2px}header p{margin:6px 0 0;color:#d5e5f4;font-size:13px}
@@ -21,64 +21,119 @@ textarea{min-height:125px;resize:vertical}button{border:0;border-radius:11px;pad
 .pill{font-size:11px;border-radius:99px;padding:5px 9px;background:#fff4d6;color:#805600;font-weight:800}
 .row{display:flex;justify-content:space-between;gap:12px;align-items:center}
 #dashboard{display:none}.stat{background:#f3f7fb;border-radius:12px;padding:13px;flex:1}.stat strong{display:block;font-size:20px}.stat span{font-size:11px;color:var(--muted)}
-.item{padding:12px 0;border-top:1px solid var(--line)}.item:first-child{border-top:0}.item strong{font-size:14px}.item p{font-size:13px;margin:5px 0;color:var(--muted);overflow-wrap:anywhere}
-.empty{padding:18px;text-align:center;color:var(--muted);font-size:13px}
-.topline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.item{padding:12px 0;border-top:1px solid var(--line)}.item strong{font-size:14px}.item p{font-size:13px;margin:5px 0;color:var(--muted);overflow-wrap:anywhere}
+.empty{padding:18px;text-align:center;color:var(--muted);font-size:13px}.topline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.linkbtn{background:none;color:var(--blue);padding:8px 0}.userline{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
 @media(min-width:560px){.stats{display:flex;gap:10px}}
 </style>
 </head>
 <body>
 <header><h1>MOB WALLET SMS</h1><p>Personal SMS dashboard · Uganda</p></header>
 <main>
-<section class="card" id="login">
-<div class="topline"><div><div class="smallcaps">PRIVATE ACCESS</div><h2 style="margin:5px 0 0">Sign in</h2></div><span class="pill">PREVIEW BUILD</span></div>
-<p class="note">This is the first interface preview. Secure account sign-in is not active yet; it must be connected to a server-side authentication service before you use a real password.</p>
-<label for="email">Email or username</label><input id="email" autocomplete="username" placeholder="Enter your username">
-<label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Enter your password">
-<button class="primary" id="signin" type="button">Sign in</button>
-<div class="notice" id="loginNotice" role="status"></div>
-<button class="secondary" id="preview" type="button" style="width:100%;margin-top:10px">Preview dashboard (no login)</button>
-<p class="note" style="margin-top:12px">Do not enter a real password in this preview.</p>
+<section class="card" id="authCard">
+<div class="topline"><div><div class="smallcaps">SECURE ACCOUNT</div><h2 id="authTitle" style="margin:5px 0 0">Sign in</h2></div><span class="pill">AUTH CONNECTED</span></div>
+<p class="note">Create your own account or sign in. Use an email address you can access. If email confirmation is enabled, confirm the message Supabase sends before signing in.</p>
+<label for="email">Email address</label><input id="email" type="email" autocomplete="username" placeholder="you@example.com">
+<label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="8" placeholder="At least 8 characters">
+<button class="primary" id="authAction" type="button">Sign in</button>
+<div class="notice" id="authNotice" role="status"></div>
+<div class="row" style="margin-top:10px"><span class="note" id="authPrompt">New here?</span><button class="linkbtn" id="authToggle" type="button">Create account</button></div>
 </section>
 
 <section id="dashboard">
 <section class="card">
 <div class="topline"><div><div class="smallcaps">MESSAGE CENTRE</div><h2 style="margin:5px 0 0">Compose SMS</h2></div><span class="pill">DEMO ONLY</span></div>
+<p class="userline" id="signedInAs"></p>
 <div class="row stats" style="margin:15px 0">
-<div class="stat"><strong class="brand">MOBWALLET</strong><span>Requested sender ID</span></div>
+<div class="stat"><strong class="brand">MOBWALLET</strong><span>Requested sender ID (approval required)</span></div>
 <div class="stat"><strong>1</strong><span>Recipient per message</span></div>
 </div>
 <label for="number">Recipient phone number</label><input id="number" type="tel" inputmode="tel" autocomplete="tel" placeholder="+256 7XX XXX XXX">
 <label for="message">Your message</label><textarea id="message" maxlength="1000" placeholder="Write your message..."></textarea>
-<div class="row"><span class="note">Use messages only for recipients who have agreed to receive them.</span><span class="note" id="count">0 / 1000</span></div>
+<div class="row"><span class="note">Message only people who agreed to receive it.</span><span class="note" id="count">0 / 1000</span></div>
 <button class="primary" id="send" type="button">Prepare message</button><div class="notice" id="sendNotice" role="status"></div>
 </section>
 <section class="card"><div class="row"><h2>Message history</h2><button class="secondary" id="clear" type="button">Clear</button></div><div id="history" class="empty">No messages prepared yet.</div></section>
-<section class="card"><h2>Before real SMS sending</h2><p class="note">This preview does not send SMS. To activate delivery, we must connect a legitimate SMS gateway through a secure backend, add its API credentials privately on the server, and obtain approval for MOBWALLET as your sender ID. Recipients will see MOBWALLET only if the provider and destination network accept and approve it. This app is not an official MTN, bank, or mobile-money notification service.</p></section>
-<div style="text-align:right;margin:0 2px 14px"><button class="secondary" id="logout" type="button">Exit preview</button></div>
+<section class="card"><h2>SMS delivery is not connected yet</h2><p class="note">This app currently authenticates users and prepares messages locally; it does NOT send SMS. Actual delivery needs a legitimate SMS gateway connected through a secure server-side function, private provider credentials, and approval for MOBWALLET by the provider and destination networks. Never use it to imitate official MTN, bank, Binance, or mobile-money alerts.</p></section>
+<div style="text-align:right;margin:0 2px 14px"><button class="secondary" id="logout" type="button">Sign out</button></div>
 </section>
 </main>
-<script>
-const $=id=>document.getElementById(id);
-function notice(id,text){const n=$(id);n.style.display='block';n.textContent=text}
-$('signin').addEventListener('click',()=>notice('loginNotice','Secure sign-in is not connected yet. The backend and password authentication must be set up before real accounts can be used.'));
-$('preview').addEventListener('click',()=>{$('login').style.display='none';$('dashboard').style.display='block'});
-$('logout').addEventListener('click',()=>{$('dashboard').style.display='none';$('login').style.display='block'});
-$('message').addEventListener('input',()=> $('count').textContent=$('message').value.length+' / 1000');
-$('send').addEventListener('click',()=>{
- const number=$('number').value.trim(),body=$('message').value.trim();
- if(!/^\+?[0-9 ]{9,16}$/.test(number)){notice('sendNotice','Enter a valid phone number, for example +2567XXXXXXXX.');return}
- if(!body){notice('sendNotice','Write a message first.');return}
- const history=$('history');if(history.classList.contains('empty')){history.className='';history.textContent=''}
- const item=document.createElement('div');item.className='item';
- const title=document.createElement('strong');title.textContent='To: '+number+' · Sender requested: MOBWALLET';
- const content=document.createElement('p');content.textContent=body;
- const status=document.createElement('span');status.className='note';status.textContent='Prepared locally — NOT SENT';
- item.append(title,content,status);history.prepend(item);
- notice('sendNotice','Message saved in this page preview only. It has NOT been sent.');
- $('message').value='';$('count').textContent='0 / 1000';
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const SUPABASE_URL = 'https://qodwblfyqzihrqrmictn.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_t80m2KE0g8NU4zOg7RyW2A_RNiyk24r';
+const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const $ = id => document.getElementById(id);
+let isSignup = false;
+function notice(id, text) { const n=$(id); n.style.display='block'; n.textContent=text; }
+function clearNotice(id) { $(id).style.display='none'; $(id).textContent=''; }
+function showApp(user) {
+  $('authCard').style.display = user ? 'none' : 'block';
+  $('dashboard').style.display = user ? 'block' : 'none';
+  if (user) $('signedInAs').textContent = 'Signed in as ' + user.email;
+}
+$('authToggle').addEventListener('click', () => {
+  isSignup = !isSignup;
+  $('authTitle').textContent = isSignup ? 'Create account' : 'Sign in';
+  $('authAction').textContent = isSignup ? 'Create account' : 'Sign in';
+  $('authPrompt').textContent = isSignup ? 'Already registered?' : 'New here?';
+  $('authToggle').textContent = isSignup ? 'Sign in' : 'Create account';
+  $('password').autocomplete = isSignup ? 'new-password' : 'current-password';
+  clearNotice('authNotice');
 });
-$('clear').addEventListener('click',()=>{$('history').className='empty';$('history').textContent='No messages prepared yet.'});
+$('authAction').addEventListener('click', async () => {
+  clearNotice('authNotice');
+  const email = $('email').value.trim();
+  const password = $('password').value;
+  if (!email || !password) return notice('authNotice', 'Enter your email address and password.');
+  if (password.length < 8) return notice('authNotice', 'Use a password with at least 8 characters.');
+  $('authAction').disabled = true;
+  $('authAction').textContent = 'Please wait…';
+  try {
+    if (isSignup) {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+      if (data.session) {
+        showApp(data.user);
+      } else {
+        notice('authNotice', 'Account created. Check your email for a confirmation link, then return here and sign in.');
+      }
+    } else {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      showApp(data.user);
+    }
+  } catch (e) {
+    notice('authNotice', e.message || 'Authentication failed. Please try again.');
+  } finally {
+    $('authAction').disabled = false;
+    $('authAction').textContent = isSignup ? 'Create account' : 'Sign in';
+  }
+});
+$('logout').addEventListener('click', async () => {
+  const { error } = await supabase.auth.signOut();
+  if (error) notice('sendNotice', error.message);
+  else showApp(null);
+});
+supabase.auth.onAuthStateChange((_event, session) => showApp(session?.user || null));
+const { data: { session } } = await supabase.auth.getSession();
+showApp(session?.user || null);
+$('message').addEventListener('input', () => $('count').textContent = $('message').value.length + ' / 1000');
+$('send').addEventListener('click', () => {
+  const number=$('number').value.trim(), body=$('message').value.trim();
+  if (!/^\+?[0-9 ]{9,16}$/.test(number)) return notice('sendNotice','Enter a valid phone number, for example +2567XXXXXXXX.');
+  if (!body) return notice('sendNotice','Write a message first.');
+  const history=$('history');
+  if (history.classList.contains('empty')) { history.className=''; history.textContent=''; }
+  const item=document.createElement('div'); item.className='item';
+  const title=document.createElement('strong'); title.textContent='To: '+number+' · Sender requested: MOBWALLET';
+  const content=document.createElement('p'); content.textContent=body;
+  const status=document.createElement('span'); status.className='note'; status.textContent='Prepared locally — NOT SENT';
+  item.append(title,content,status); history.prepend(item);
+  notice('sendNotice','Message prepared in this browser only. It has NOT been sent.');
+  $('message').value=''; $('count').textContent='0 / 1000';
+});
+$('clear').addEventListener('click', () => { $('history').className='empty'; $('history').textContent='No messages prepared yet.'; });
 </script>
 </body>
 </html>
